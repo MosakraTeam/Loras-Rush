@@ -242,7 +242,7 @@ function setAnimation(hero, x,y)
     elseif (y < 0) and (x < -math.sin(math.rad(22,5))) and (x >= -math.sin(math.rad(67,5))) then seq = "75"
     elseif (x < -math.sin(math.rad(67,5))) then seq = "9"
     elseif (y >= 0) and (x < -math.sin(math.rad(22,5))) and (x >= -math.sin(math.rad(67,5))) then seq = "105" 
-    elseif (math.abs(x) < math.sin(math.rad(22,5))) and (y >= 0) then seq = "2"
+    elseif (math.abs(x) < math.sin(math.rad(22,5))) and (y >= 0) then seq = "12"
     end
 
     hero['sprite']:setSequence(hero['seqName'] .. '-' .. seq)
