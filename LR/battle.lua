@@ -205,10 +205,12 @@ function setAnimation(hero, x,y)
     elseif (math.abs(x) < math.sin(math.rad(22,5))) and (y >= 0) then seq = "neutral-12"
     --elseif (y < 0) then seq = "neutral-6" 
     end
-
-    print(math.sin(math.rad(22,5)))
-    print(x)
-    print(seq)
+print(seq)
+print(hero)
+    if not(seq==nil) then
+        hero['sprite']:setSequence(seq)
+    end
+    
 end
 
 function toPoint(hero,xy)
