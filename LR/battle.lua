@@ -17,11 +17,15 @@ local barbarian = {}
 
 barbarian['stats'] = {}
 barbarian['stats']['movementSpeed'] = 4
+barbarian['flags'] = {}
+barbarian['flags']['canMove'] = true
 
 local stworek = {}
 
 stworek['stats'] = {}
 stworek['stats']['movementSpeed'] = 2
+stworek['flags'] = {}
+stworek['flags']['canMove'] = true
 
 local gameLoopTimer
 
@@ -193,6 +197,40 @@ function randomHero(enemy)
 --return heroTable[mlem]
 end
 
+function setGroupOrder(group)
+    canSort = false 
+    itmp = {}
+    
+    for i=1,group.numChildren do
+        table.insert(itmp,i)
+    end
+
+    tmpitmp = itmp
+
+    for i=1,group.numChildren-1 do
+        for j=1,group.numChildren do
+            if group[itmp[i]].y > group[itmp[j]].y then
+                tmp = itmp[i]
+                itmp[i] = itmp[j]
+                itmp[j] = tmp
+                canSort = true
+            end
+        end
+    end
+
+    for i=1,group.numChildren do
+        print(itmp[i])
+    end
+
+        print('-------------------------')
+    
+    if canSort then
+        for i=1,group.numChildren do
+            group[itmp[i]]:toFront()
+        end
+    end
+end
+
 function setAnimation(hero, x,y)
     local seq
     if (y >= 0) and (x >= math.sin(math.rad(22,5))) and (x < math.sin(math.rad(67,5))) then seq = "neutral-15" 
@@ -205,51 +243,85 @@ function setAnimation(hero, x,y)
     elseif (math.abs(x) < math.sin(math.rad(22,5))) and (y >= 0) then seq = "neutral-12"
     --elseif (y < 0) then seq = "neutral-6" 
     end
-print(seq)
-print(hero)
-    if not(seq==nil) then
-        hero['sprite']:setSequence(seq)
-    end
+
+    hero['sprite']:setSequence(seq)
     
 end
 
+function checkColision(hero,enemy)
+    x1 = hero['sprite'].x
+    y1 = hero['sprite'].y
+    w1 = hero['sprite'].width/4
+    h1 = hero['sprite'].height/4
+
+    x2 = enemy['sprite'].x
+    y2 = enemy['sprite'].y
+    w2 = enemy['sprite'].width/4
+    h2 = enemy['sprite'].height/4
+
+    difX = math.abs(x1 - x2)
+    difY = math.abs(y1 - y2)
+
+    sumW = w1 + w2
+    sumH = h1 + h2
+
+    if (sumW > difX) and (sumH > difY) then
+        hero['flags']['canMove'] = false
+        enemy['flags']['canMove'] = false
+    else
+        hero['flags']['canMove'] = true
+        enemy['flags']['canMove'] = true
+    end
+end
+
 function toPoint(hero,xy)
-    startX = hero['sprite'].x
-    startY = hero['sprite'].y
-    endX = xy['x']
-    endY = xy['y']
-    speed = hero['stats']['movementSpeed']
+    if hero['flags']['canMove'] then
+        startX = hero['sprite'].x
+        startY = hero['sprite'].y
+        endX = xy['x']
+        endY = xy['y']
+        speed = hero['stats']['movementSpeed']
 
-    distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
+        distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
 
-    directionX = (endX-startX) / distance;
-    directionY = (endY-startY) / distance;
+        directionX = (endX-startX) / distance;
+        directionY = (startY-endY) / distance;
 
-    --setAnimation(hero, directionX, directionY)
-    hero['sprite'].x = hero['sprite'].x + directionX * speed
-    hero['sprite'].y = hero['sprite'].y + directionY * speed
+        setAnimation(hero, directionX, directionY)
+        hero['sprite'].x = hero['sprite'].x + directionX * speed
+        hero['sprite'].y = hero['sprite'].y - directionY * speed
+    end
 end
 
 function toSprite(hero,enemy)
-    startX = hero['sprite'].x
-    startY = hero['sprite'].y
-    endX = enemy['sprite'].x
-    endY = enemy['sprite'].y
-    speed = hero['stats']['movementSpeed']
+    if hero['flags']['canMove'] then
+        startX = hero['sprite'].x
+        startY = hero['sprite'].y
+        endX = enemy['sprite'].x
+        endY = enemy['sprite'].y
+        speed = hero['stats']['movementSpeed']
 
-    distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
+        distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
 
-    directionX = (endX-startX) / distance;
-    directionY = (startY-endY) / distance;
+        directionX = (endX-startX) / distance;
+        directionY = (startY-endY) / distance;
 
-    setAnimation(hero, directionX, directionY)
-    hero['sprite'].x = hero['sprite'].x + directionX * speed
-    hero['sprite'].y = hero['sprite'].y - directionY * speed
+        setAnimation(hero, directionX, directionY)
+        hero['sprite'].x = hero['sprite'].x + directionX * speed
+        hero['sprite'].y = hero['sprite'].y - directionY * speed
+    end
+end
+
+function moveEnemy(event) --temporary
+    stworek['sprite'].x = event.x
+    stworek['sprite'].y = event.y
 end
 
 local function gameLoop()
     toSprite(barbarian,stworek)
-    --toPoint(stworek,{x=300,y=50})
+    toSprite(stworek,barbarian)
+    checkColision(barbarian,stworek)
+    setGroupOrder(mainGroup)
 end
 
 -- -----------------------------------------------------------------------------------
@@ -281,6 +353,7 @@ function scene:create( event )
     barbarian['sprite'] = display.newSprite(mainGroup, sheet_hBarb_neutral, sequences_hBarb_neutral )
     barbarian['sprite'].x = display.actualContentWidth/2
     barbarian['sprite'].y = display.actualContentHeight/2
+    barbarian['sprite'].myName = "barbarian"
 
     barbarian['sprite']:setSequence( "neutral-45" )
     barbarian['sprite']:play()
@@ -288,10 +361,12 @@ function scene:create( event )
     stworek['sprite'] = display.newSprite(mainGroup, sheet_hBarb_neutral, sequences_hBarb_neutral )
     stworek['sprite'].x = 280
     stworek['sprite'].y = 0
+    stworek['sprite'].myName = "stworek"
 
     stworek['sprite']:setSequence( "neutral-105" )
     stworek['sprite']:play()
 
+    background:addEventListener( "touch", moveEnemy )
 end
 
 
