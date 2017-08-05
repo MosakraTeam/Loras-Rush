@@ -16,16 +16,18 @@ local uiGroup
 local barbarian = {}
 
 barbarian['stats'] = {}
-barbarian['stats']['movementSpeed'] = 4
+barbarian['stats']['movementSpeed'] = 2
 barbarian['flags'] = {}
 barbarian['flags']['canMove'] = true
+barbarian['seqName'] = "neutral"
 
 local stworek = {}
 
 stworek['stats'] = {}
-stworek['stats']['movementSpeed'] = 2
+stworek['stats']['movementSpeed'] = 1
 stworek['flags'] = {}
 stworek['flags']['canMove'] = true
+stworek['seqName'] = "neutral"
 
 local gameLoopTimer
 
@@ -233,18 +235,17 @@ end
 
 function setAnimation(hero, x,y)
     local seq
-    if (y >= 0) and (x >= math.sin(math.rad(22,5))) and (x < math.sin(math.rad(67,5))) then seq = "neutral-15" 
-    elseif (x >= math.sin(math.rad(67,5))) then seq = "neutral-3"
-    elseif (y < 0) and (x >= math.sin(math.rad(22,5))) and (x < math.sin(math.rad(67,5))) then seq = "neutral-45" 
-    elseif (math.abs(x) < math.sin(math.rad(22,5))) and (y < 0) then seq = "neutral-6"
-    elseif (y < 0) and (x < -math.sin(math.rad(22,5))) and (x >= -math.sin(math.rad(67,5))) then seq = "neutral-75"
-    elseif (x < -math.sin(math.rad(67,5))) then seq = "neutral-9"
-    elseif (y >= 0) and (x < -math.sin(math.rad(22,5))) and (x >= -math.sin(math.rad(67,5))) then seq = "neutral-105" 
-    elseif (math.abs(x) < math.sin(math.rad(22,5))) and (y >= 0) then seq = "neutral-12"
-    --elseif (y < 0) then seq = "neutral-6" 
+    if (y >= 0) and (x >= math.sin(math.rad(22,5))) and (x < math.sin(math.rad(67,5))) then seq = "15" 
+    elseif (x >= math.sin(math.rad(67,5))) then seq = "3"
+    elseif (y < 0) and (x >= math.sin(math.rad(22,5))) and (x < math.sin(math.rad(67,5))) then seq = "45" 
+    elseif (math.abs(x) < math.sin(math.rad(22,5))) and (y < 0) then seq = "6"
+    elseif (y < 0) and (x < -math.sin(math.rad(22,5))) and (x >= -math.sin(math.rad(67,5))) then seq = "75"
+    elseif (x < -math.sin(math.rad(67,5))) then seq = "9"
+    elseif (y >= 0) and (x < -math.sin(math.rad(22,5))) and (x >= -math.sin(math.rad(67,5))) then seq = "105" 
+    elseif (math.abs(x) < math.sin(math.rad(22,5))) and (y >= 0) then seq = "2"
     end
 
-    hero['sprite']:setSequence(seq)
+    hero['sprite']:setSequence(hero['seqName'] .. '-' .. seq)
     
 end
 
@@ -381,7 +382,7 @@ function scene:show( event )
 
 	elseif ( phase == "did" ) then
 		-- Code here runs when the scene is entirely on screen
-        gameLoopTimer = timer.performWithDelay( 150, gameLoop, 0 )
+        gameLoopTimer = timer.performWithDelay( 15, gameLoop, 0 )
 
 	end
 end
