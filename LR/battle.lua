@@ -8,126 +8,247 @@ local scene = composer.newScene()
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
 -- -----------------------------------------------------------------------------------
 
-local lorasSheetOptions = {
-    frames = {
-        {   -- 1. loras run 1
-            x = 70,
-            y = 50,
-            width = 70,
-            height = 100,
-			sourceX = 0,
-            sourceY = 0,
-            sourceWidth = 0,
-            sourceHeight = 0
-        },
-		{   -- 2. loras run 2
-            x = 155,
-            y = 50,
-            width = 70,
-            height = 100,
-			sourceX = 0,
-            sourceY = 0,
-            sourceWidth = 0,
-            sourceHeight = 0
-        },
-		{   -- 3. loras run 3
-            x = 240,
-            y = 50,
-            width = 70,
-            height = 100,
-			sourceX = 0,
-            sourceY = 0,
-            sourceWidth = 0,
-            sourceHeight = 0
-        },
-		{   -- 4. loras run 4
-            x = 325,
-            y = 50,
-            width = 70,
-            height = 100,
-			sourceX = 0,
-            sourceY = 0,
-            sourceWidth = 0,
-            sourceHeight = 0
-        }
-    }
+local backGroup
+local grassGroup
+local mainGroup
+local uiGroup
+
+local barbarian = {}
+
+barbarian['stats'] = {}
+barbarian['stats']['movementSpeed'] = 4
+
+local stworek = {}
+
+stworek['stats'] = {}
+stworek['stats']['movementSpeed'] = 2
+
+local gameLoopTimer
+
+local hBarb_neutralSheetOption =
+{
+    width = 72,
+    height = 103,
+    numFrames = 128
 }
 
-local lorasSheet = graphics.newImageSheet( "images/sLoras.png", lorasSheetOptions )
+local sheet_hBarb_neutral = graphics.newImageSheet( "images/hBarb-neutral.png", hBarb_neutralSheetOption )
 
--- Configure image sequences
-local lorasSequences = {
-    -- non-consecutive frames sequence
+-- sequences table
+local sequences_hBarb_neutral = {
+    -- consecutive frames sequence
     {
-        name = "run",
-        frames = { 1,2,3,4 },
-        time = 500,
+        name = "neutral-7",
+        sheet = sheet_hBarb_neutral,
+        start = 9,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-75",
+        sheet = sheet_hBarb_neutral,
+        start = 17,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-8",
+        sheet = sheet_hBarb_neutral,
+        start = 25,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-9",
+        sheet = sheet_hBarb_neutral,
+        start = 33,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-10",
+        sheet = sheet_hBarb_neutral,
+        start = 41,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-105",
+        sheet = sheet_hBarb_neutral,
+        start = 49,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-11",
+        sheet = sheet_hBarb_neutral,
+        start = 57,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-12",
+        sheet = sheet_hBarb_neutral,
+        start = 65,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-1",
+        sheet = sheet_hBarb_neutral,
+        start = 73,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-15",
+        sheet = sheet_hBarb_neutral,
+        start = 81,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-2",
+        sheet = sheet_hBarb_neutral,
+        start = 89,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-3",
+        sheet = sheet_hBarb_neutral,
+        start = 97,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-4",
+        sheet = sheet_hBarb_neutral,
+        start = 105,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-45",
+        sheet = sheet_hBarb_neutral,
+        start = 113,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-5",
+        sheet = sheet_hBarb_neutral,
+        start = 121,
+        count = 8,
+        time = 1200,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+        name = "neutral-6",
+        sheet = sheet_hBarb_neutral,
+        start = 1,
+        count = 8,
+        time = 1200,
         loopCount = 0,
         loopDirection = "forward"
     }
 }
 
-local trawaSheetOptions = {
-    frames = {
-        {   -- 1. trawa 1
-            x = 692,
-            y = 751,
-            width = 76,
-            height = 77,
-			sourceX = 0,
-            sourceY = 0,
-            sourceWidth = 0,
-            sourceHeight = 0
-        }
-    }
-}
+-- -----------------------------------------------------------------------------------
+-- Main Loop functions
+-- -----------------------------------------------------------------------------------
 
-local guzikSheetOptions = {
-    frames = {
-        {   -- 1. lewo
-            x = 0,
-            y = 0,
-            width = 100,
-            height = 100,
-			sourceX = 0,
-            sourceY = 0,
-            sourceWidth = 0,
-            sourceHeight = 0
-        },
-        {   -- 1. prawo
-            x = 100,
-            y = 0,
-            width = 100,
-            height = 100,
-			sourceX = 0,
-            sourceY = 0,
-            sourceWidth = 0,
-            sourceHeight = 0
-        },
-        {   -- 1. a
-            x = 200,
-            y = 0,
-            width = 100,
-            height = 100,
-			sourceX = 0,
-            sourceY = 0,
-            sourceWidth = 0,
-            sourceHeight = 0
-        },
-        {   -- 1. b
-            x = 300,
-            y = 0,
-            width = 100,
-            height = 100,
-			sourceX = 0,
-            sourceY = 0,
-            sourceWidth = 0,
-            sourceHeight = 0
-        },
-        
-    }
-}
+function randomHero(enemy)
+--tablica herosów
+--mlem = math.rand(5)
+--return heroTable[mlem]
+end
 
+function setAnimation(hero, x,y)
+    local seq
+    if (y >= 0) and (x >= math.sin(math.rad(22,5))) and (x < math.sin(math.rad(67,5))) then seq = "neutral-15" 
+    elseif (x >= math.sin(math.rad(67,5))) then seq = "neutral-3"
+    elseif (y < 0) and (x >= math.sin(math.rad(22,5))) and (x < math.sin(math.rad(67,5))) then seq = "neutral-45" 
+    elseif (math.abs(x) < math.sin(math.rad(22,5))) and (y < 0) then seq = "neutral-6"
+    elseif (y < 0) and (x < -math.sin(math.rad(22,5))) and (x >= -math.sin(math.rad(67,5))) then seq = "neutral-75"
+    elseif (x < -math.sin(math.rad(67,5))) then seq = "neutral-9"
+    elseif (y >= 0) and (x < -math.sin(math.rad(22,5))) and (x >= -math.sin(math.rad(67,5))) then seq = "neutral-105" 
+    elseif (math.abs(x) < math.sin(math.rad(22,5))) and (y >= 0) then seq = "neutral-12"
+    --elseif (y < 0) then seq = "neutral-6" 
+    end
+
+    print(math.sin(math.rad(22,5)))
+    print(x)
+    print(seq)
+end
+
+function toPoint(hero,xy)
+    startX = hero['sprite'].x
+    startY = hero['sprite'].y
+    endX = xy['x']
+    endY = xy['y']
+    speed = hero['stats']['movementSpeed']
+
+    distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
+
+    directionX = (endX-startX) / distance;
+    directionY = (endY-startY) / distance;
+
+    --setAnimation(hero, directionX, directionY)
+    hero['sprite'].x = hero['sprite'].x + directionX * speed
+    hero['sprite'].y = hero['sprite'].y + directionY * speed
+end
+
+function toSprite(hero,enemy)
+    startX = hero['sprite'].x
+    startY = hero['sprite'].y
+    endX = enemy['sprite'].x
+    endY = enemy['sprite'].y
+    speed = hero['stats']['movementSpeed']
+
+    distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
+
+    directionX = (endX-startX) / distance;
+    directionY = (startY-endY) / distance;
+
+    setAnimation(hero, directionX, directionY)
+    hero['sprite'].x = hero['sprite'].x + directionX * speed
+    hero['sprite'].y = hero['sprite'].y - directionY * speed
+end
+
+local function gameLoop()
+    toSprite(barbarian,stworek)
+    --toPoint(stworek,{x=300,y=50})
+end
 
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
@@ -138,6 +259,36 @@ function scene:create( event )
 
 	local sceneGroup = self.view
 	-- Code here runs when the scene is first created but has not yet appeared on screen
+
+    -- Set up display groups
+	backGroup = display.newGroup()  -- Display group for the background image
+	sceneGroup:insert( backGroup )  -- Insert into the scene's view group
+
+    grassGroup = display.newGroup()
+	sceneGroup:insert( grassGroup ) 
+
+	mainGroup = display.newGroup()  -- Display group for the ship, asteroids, lasers, etc.
+	sceneGroup:insert( mainGroup )  -- Insert into the scene's view group
+
+	uiGroup = display.newGroup()    -- Display group for UI objects like the score
+	sceneGroup:insert( uiGroup )    -- Insert into the scene's view group
+
+    local background = display.newRect(backGroup,display.actualContentWidth/2,display.actualContentHeight/2,display.actualContentWidth,display.actualContentHeight)
+	background:setFillColor(0,1,1,1);
+
+    barbarian['sprite'] = display.newSprite(mainGroup, sheet_hBarb_neutral, sequences_hBarb_neutral )
+    barbarian['sprite'].x = display.actualContentWidth/2
+    barbarian['sprite'].y = display.actualContentHeight/2
+
+    barbarian['sprite']:setSequence( "neutral-45" )
+    barbarian['sprite']:play()
+
+    stworek['sprite'] = display.newSprite(mainGroup, sheet_hBarb_neutral, sequences_hBarb_neutral )
+    stworek['sprite'].x = 280
+    stworek['sprite'].y = 0
+
+    stworek['sprite']:setSequence( "neutral-105" )
+    stworek['sprite']:play()
 
 end
 
@@ -153,6 +304,7 @@ function scene:show( event )
 
 	elseif ( phase == "did" ) then
 		-- Code here runs when the scene is entirely on screen
+        gameLoopTimer = timer.performWithDelay( 150, gameLoop, 0 )
 
 	end
 end
@@ -166,7 +318,7 @@ function scene:hide( event )
 
 	if ( phase == "will" ) then
 		-- Code here runs when the scene is on screen (but is about to go off screen)
-
+        timer.cancel( gameLoopTimer )
 	elseif ( phase == "did" ) then
 		-- Code here runs immediately after the scene goes entirely off screen
 
