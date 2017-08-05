@@ -235,14 +235,16 @@ end
 
 function setAnimation(hero, x,y)
     local seq
-    if (y >= 0) and (x >= math.sin(math.rad(22,5))) and (x < math.sin(math.rad(67,5))) then seq = "15" 
-    elseif (x >= math.sin(math.rad(67,5))) then seq = "3"
-    elseif (y < 0) and (x >= math.sin(math.rad(22,5))) and (x < math.sin(math.rad(67,5))) then seq = "45" 
-    elseif (math.abs(x) < math.sin(math.rad(22,5))) and (y < 0) then seq = "6"
-    elseif (y < 0) and (x < -math.sin(math.rad(22,5))) and (x >= -math.sin(math.rad(67,5))) then seq = "75"
-    elseif (x < -math.sin(math.rad(67,5))) then seq = "9"
-    elseif (y >= 0) and (x < -math.sin(math.rad(22,5))) and (x >= -math.sin(math.rad(67,5))) then seq = "105" 
-    elseif (math.abs(x) < math.sin(math.rad(22,5))) and (y >= 0) then seq = "12"
+    local sin225 = math.sin(math.rad(22,5))
+    local sin675 = math.sin(math.rad(67,5))
+    if (y >= 0) and (x >= sin225) and (x < sin675) then seq = "15" 
+    elseif (x >= sin675) then seq = "3"
+    elseif (y < 0) and (x >= sin225) and (x < sin675) then seq = "45" 
+    elseif (math.abs(x) < sin225) and (y < 0) then seq = "6"
+    elseif (y < 0) and (x < -sin225) and (x >= -sin675) then seq = "75"
+    elseif (x < -sin675) then seq = "9"
+    elseif (y >= 0) and (x < -sin225) and (x >= -sin675) then seq = "105" 
+    elseif (math.abs(x) < sin225) and (y >= 0) then seq = "12"
     end
 
     hero['sprite']:setSequence(hero['seqName'] .. '-' .. seq)
