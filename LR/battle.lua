@@ -4,7 +4,6 @@ local composer = require( "composer" )
 local scene = composer.newScene()
 
 local hBarb = require("heroes.hBarb")
-local hBarb2 = require("heroes.hBarb")
 
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
@@ -193,7 +192,7 @@ function scene:create( event )
 
     barbarian = hBarb.hero(mainGroup, display.actualContentWidth/2, display.actualContentHeight/2, 'barbarian')
 
-    stworek = hBarb2.hero(mainGroup, display.actualContentWidth/2 - 50, 50, 'stworek')
+    stworek = hBarb.hero(mainGroup, display.actualContentWidth/2 - 50, 50, 'stworek')
 
     background:addEventListener( "touch", moveEnemy )
 end
