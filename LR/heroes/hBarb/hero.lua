@@ -9,7 +9,7 @@ local h_neutral_SheetOption = {
 }
 
 --strona neutralna (to trzeba powielić dla wszystkich rodzajów animacji)
-local sheet_h_neutral = graphics.newImageSheet( "images/hBarb-neutral.png", h_neutral_SheetOption )
+local sheet_h_neutral = graphics.newImageSheet( "heroes/hBarb/neutral.png", h_neutral_SheetOption )
 
 --sekwencja animacji herosa (tu trzeba dodawać wszystkie nimacje z podziałęm na strnoy)
 local sequences_h = {

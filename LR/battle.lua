@@ -3,7 +3,7 @@ local composer = require( "composer" )
 
 local scene = composer.newScene()
 
-local hBarb = require("heroes.hBarb")
+local hBarb = require("heroes.hBarb.hero")
 
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
