@@ -1,190 +1,79 @@
---główny obiekt który będzie zwracany jako heros
-local class = {}
+-- -----------------------------------------------------------------------------------------------------
+-- TUTAJ MOŻNA COŚ ZMIENIAĆ ----------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------------------------
 
---czasy animacji (łatwiej bd zmienić)
+local folder = "spikeFiend"
 
-local runTime = 1000
-local neutralTime = 1200
-
---opcje neutralnej strony (to trzeba powielić dla wszystkich rodzajów animacji)
-local h_neutral_SheetOption = {
-    width = 87,
-    height = 55,
-    sourceX = 0,
-    sourceY = 48,
-    sourceHeight = 103,
-    sourceWidth = 87,
-    numFrames = 64
-}
-
-local h_run_SheetOption = {
-    width = 88,
-    height = 52,
-    sourceX = 0,
-    sourceY = 58,
-    sourceHeight = 110,
-    sourceWidth = 88,
-    numFrames = 72
-}
-
---strona neutralna (to trzeba powielić dla wszystkich rodzajów animacji)
-local sheet_h_neutral = graphics.newImageSheet( "heroes/spikeFiend/neutral.png", h_neutral_SheetOption )
-local sheet_h_run = graphics.newImageSheet( "heroes/spikeFiend/run.png", h_run_SheetOption )
-
---sekwencja animacji herosa (tu trzeba dodawać wszystkie nimacje z podziałęm na strnoy)
-local sequences_h = {
-    -- consecutive frames sequence
-    -- neutral
-    {
-        name = "neutral-75",
-        sheet = sheet_h_neutral,
-        start = 9,
+local sheetOptions = {
+    neutral = {
+        width = 87,
+        height = 55,
+        numFrames = 64,
+        sourceX = 0,
+        sourceY = 48,
+        sourceHeight = 103,
+        sourceWidth = 87,
         count = 8,
-        time = neutralTime,
-        loopCount = 0,
-        loopDirection = "forward"
+        time = 1200
     },
-    {
-        name = "neutral-9",
-        sheet = sheet_h_neutral,
-        start = 17,
-        count = 8,
-        time = neutralTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-105",
-        sheet = sheet_h_neutral,
-        start = 25,
-        count = 8,
-        time = neutralTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-12",
-        sheet = sheet_h_neutral,
-        start = 33,
-        count = 8,
-        time = neutralTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-15",
-        sheet = sheet_h_neutral,
-        start = 41,
-        count = 8,
-        time = neutralTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-3",
-        sheet = sheet_h_neutral,
-        start = 49,
-        count = 8,
-        time = neutralTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-45",
-        sheet = sheet_h_neutral,
-        start = 57,
-        count = 8,
-        time = neutralTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-6",
-        sheet = sheet_h_neutral,
-        start = 1,
-        count = 8,
-        time = neutralTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    -- run
-    {
-        name = "run-75",
-        sheet = sheet_h_run,
-        start = 10,
+    run = {
+        width = 88,
+        height = 52,
+        numFrames = 72,
+        sourceX = 0,
+        sourceY = 58,
+        sourceHeight = 110,
+        sourceWidth = 88,
         count = 9,
-        time = runTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "run-9",
-        sheet = sheet_h_run,
-        start = 19,
-        count = 9,
-        time = runTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "run-105",
-        sheet = sheet_h_run,
-        start = 28,
-        count = 9,
-        time = runTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "run-12",
-        sheet = sheet_h_run,
-        start = 37,
-        count = 9,
-        time = runTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "run-15",
-        sheet = sheet_h_run,
-        start = 46,
-        count = 9,
-        time = runTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "run-3",
-        sheet = sheet_h_run,
-        start = 55,
-        count = 9,
-        time = runTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "run-45",
-        sheet = sheet_h_run,
-        start = 64,
-        count = 9,
-        time = runTime,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "run-6",
-        sheet = sheet_h_run,
-        start = 1,
-        count = 9,
-        time = runTime,
-        loopCount = 0,
-        loopDirection = "forward"
+        time = 1000
     }
 }
+
+-- -----------------------------------------------------------------------------------------------------
+-- TUTAJ JUŻ NIE MOŻNA ZMIENIAĆ ------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------------------------
+
+local arcTable = {
+    "-6",
+    "-75",
+    "-9",
+    "-105",
+    "-12",
+    "-15",
+    "-3",
+    "-45"
+}
+
+local class = {}
+
+local sheets = {}
+
+local sequences_h = {}
+
+local function createSequences(sequences, name)
+    sheets[name] = graphics.newImageSheet( "heroes/" .. folder .. "/" .. name .. ".png", sheetOptions[name] )
+    number = sheetOptions[name]['numFrames']/sheetOptions[name]['count']
+    for i=1, number do
+        table.insert(sequences,{
+            name = name .. arcTable[i],
+            sheet = sheets[name],
+            start = 1 + (i - 1) * sheetOptions[name]['count'],
+            count = sheetOptions[name]['count'],
+            time = sheetOptions[name]['time'],
+            loopCount = 0,
+            loopDirection = "forward"
+        })
+    end
+end
 
 --funkcja tworząca herosa
 local function hero(group, x, y, name)
     --główny obiekt herosa
+
+    for k,v in pairs(sheetOptions) do
+        createSequences(sequences_h, k)
+    end
+
     local h = {}
 
     --statystyki herosa
@@ -199,7 +88,7 @@ local function hero(group, x, y, name)
     h['seqName'] = "neutral"
 
     --tworzenie sprite o podanej grupie, pozycji i nazwie
-    h['sprite'] = display.newSprite(group, sheet_h_neutral, sequences_h )
+    h['sprite'] = display.newSprite(group, sheets['neutral'], sequences_h )
     h['sprite'].x = x
     h['sprite'].y = y
     h['sprite'].myName = name

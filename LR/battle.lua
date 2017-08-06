@@ -74,7 +74,7 @@ function setAnimation(hero, x,y)
     elseif (math.abs(x) < sin225) and (y >= 0) then seq = "12"
     end
 
-    print(hero['seqName'])
+    --print(hero['seqName'])
 
     if not (hero['sprite'].sequence == hero['seqName'] .. '-' .. seq) then
         frame = hero['sprite'].frame
