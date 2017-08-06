@@ -219,12 +219,6 @@ function setGroupOrder(group)
             end
         end
     end
-
-    for i=1,group.numChildren do
-        print(itmp[i])
-    end
-
-        print('-------------------------')
     
     if canSort then
         for i=1,group.numChildren do
