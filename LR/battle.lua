@@ -74,6 +74,8 @@ function setAnimation(hero, x,y)
     elseif (math.abs(x) < sin225) and (y >= 0) then seq = "12"
     end
 
+    print(hero['seqName'])
+
     if not (hero['sprite'].sequence == hero['seqName'] .. '-' .. seq) then
         frame = hero['sprite'].frame
         mainName = string.gmatch(hero['sprite'].sequence,'-')
@@ -109,45 +111,55 @@ function checkColision(hero,enemy)
     if (sumW > difX) and (sumH > difY) then
         hero['flags']['canMove'] = false
         enemy['flags']['canMove'] = false
+
+        hero['seqName'] = 'neutral'
+        enemy['seqName'] = 'neutral'
     else
         hero['flags']['canMove'] = true
         enemy['flags']['canMove'] = true
+
+        hero['seqName'] = 'run'
+        enemy['seqName'] = 'run'
     end
 end
 
 function toPoint(hero,xy)
+    
+    startX = hero['sprite'].x
+    startY = hero['sprite'].y
+    endX = xy['x']
+    endY = xy['y']
+    speed = hero['stats']['movementSpeed']
+
+    distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
+
+    directionX = (endX-startX) / distance;
+    directionY = (startY-endY) / distance;
+
+    setAnimation(hero, directionX, directionY)
+
     if hero['flags']['canMove'] then
-        startX = hero['sprite'].x
-        startY = hero['sprite'].y
-        endX = xy['x']
-        endY = xy['y']
-        speed = hero['stats']['movementSpeed']
-
-        distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
-
-        directionX = (endX-startX) / distance;
-        directionY = (startY-endY) / distance;
-
-        setAnimation(hero, directionX, directionY)
         hero['sprite'].x = hero['sprite'].x + directionX * speed
         hero['sprite'].y = hero['sprite'].y - directionY * speed
     end
 end
 
 function toSprite(hero,enemy)
+    
+    startX = hero['sprite'].x
+    startY = hero['sprite'].y
+    endX = enemy['sprite'].x
+    endY = enemy['sprite'].y
+    speed = hero['stats']['movementSpeed']
+
+    distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
+
+    directionX = (endX-startX) / distance;
+    directionY = (startY-endY) / distance;
+
+    setAnimation(hero, directionX, directionY)
+    
     if hero['flags']['canMove'] then
-        startX = hero['sprite'].x
-        startY = hero['sprite'].y
-        endX = enemy['sprite'].x
-        endY = enemy['sprite'].y
-        speed = hero['stats']['movementSpeed']
-
-        distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
-
-        directionX = (endX-startX) / distance;
-        directionY = (startY-endY) / distance;
-
-        setAnimation(hero, directionX, directionY)
         hero['sprite'].x = hero['sprite'].x + directionX * speed
         hero['sprite'].y = hero['sprite'].y - directionY * speed
     end
@@ -160,6 +172,7 @@ end
 
 function debugSpritePrint(sprite) 
     print(sprite.myName .. ' ' .. sprite.x .. ' ' .. sprite.y)
+    print(sprite.sequence)
 end
 
 local function gameLoop()
@@ -167,8 +180,8 @@ local function gameLoop()
     toSprite(stworek,barbarian)
     checkColision(barbarian,stworek)
     setGroupOrder(mainGroup)
-    debugSpritePrint(barbarian['sprite'])
-    debugSpritePrint(stworek['sprite'])
+    --debugSpritePrint(barbarian['sprite'])
+    --debugSpritePrint(stworek['sprite'])
 end
 
 -- -----------------------------------------------------------------------------------

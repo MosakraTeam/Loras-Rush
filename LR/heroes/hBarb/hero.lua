@@ -188,7 +188,7 @@ local function hero(group, x, y, name)
     h['flags']['canMove'] = true
 
     --nazwa początkowej sekwencji
-    h['seqName'] = "run"
+    h['seqName'] = "neutral"
 
     --tworzenie sprite o podanej grupie, pozycji i nazwie
     h['sprite'] = display.newSprite(group, sheet_h_neutral, sequences_h )
