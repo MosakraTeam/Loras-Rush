@@ -10,6 +10,10 @@ local neutralTime = 1200
 local h_neutral_SheetOption = {
     width = 87,
     height = 55,
+    sourceX = 0,
+    sourceY = 48,
+    sourceHeight = 103,
+    sourceWidth = 87,
     numFrames = 64
 }
 
