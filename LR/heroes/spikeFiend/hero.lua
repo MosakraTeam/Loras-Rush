@@ -6,26 +6,26 @@ local folder = "spikeFiend"
 
 local sheetOptions = {
     neutral = {
-        width = 87,
-        height = 55,
-        numFrames = 64,
-        sourceX = 0,
-        sourceY = 48,
-        sourceHeight = 103,
-        sourceWidth = 87,
-        count = 8,
-        time = 1200
+        width = 87, -- szerokość klatki
+        height = 55, -- wysokość klatki
+        numFrames = 64, -- łączna liczba wszystkich klatek w pliku png
+        sourceX = 0, -- zostawić 0
+        sourceY = 48, -- wysokość klatki hBarb dla tej animacji - wysokość klatki
+        sourceHeight = 103, -- wysokość klatki hBarb dla tej animacji
+        sourceWidth = 87, -- szerokość klatki
+        count = 8, -- ilość klatek w jednym wierszu pliku png
+        time = 1200 -- czas trwania animacji
     },
     run = {
-        width = 88,
-        height = 52,
-        numFrames = 72,
-        sourceX = 0,
-        sourceY = 58,
-        sourceHeight = 110,
-        sourceWidth = 88,
-        count = 9,
-        time = 1000
+        width = 88, -- szerokość klatki
+        height = 52, -- wysokość klatki
+        numFrames = 72, -- łączna liczba wszystkich klatek w pliku png
+        sourceX = 0, -- zostawić 0
+        sourceY = 58, -- wysokość klatki hBarb dla tej animacji - wysokość klatki
+        sourceHeight = 110, -- wysokość klatki hBarb dla tej animacji
+        sourceWidth = 88, -- szerokość klatki
+        count = 9, -- ilość klatek w jednym wierszu pliku png
+        time = 1000 -- czas trwania animacji
     }
 }
 

@@ -6,26 +6,26 @@ local folder = "hBarb"
 
 local sheetOptions = {
     neutral = {
-        width = 72,
-        height = 103,
-        numFrames = 128,
-        sourceX = 0,
-        sourceY = 0,
-        sourceHeight = 103,
-        sourceWidth = 72,
-        count = 8,
-        time = 1200
+        width = 72, -- szerokość klatki
+        height = 103, -- wysokość klatki
+        numFrames = 128, -- łączna liczba wszystkich klatek w pliku png
+        sourceX = 0, -- zostawić 0
+        sourceY = 0, -- wysokość klatki hBarb dla tej animacji - wysokość klatki
+        sourceHeight = 103, -- zostawić 103
+        sourceWidth = 72, -- szerokość klatki
+        count = 8, -- ilość klatek w jednym wierszu pliku png
+        time = 1200 -- czas trwania animacji
     },
     run = {
-        width = 68,
-        height = 110,
-        numFrames = 128,
-        sourceX = 0,
-        sourceY = 0,
-        sourceHeight = 110,
-        sourceWidth = 68,
-        count = 8,
-        time = 1000
+        width = 68, -- szerokość klatki
+        height = 110, -- wysokość klatki
+        numFrames = 128, -- łączna liczba wszystkich klatek w pliku png
+        sourceX = 0, -- zostawić 0
+        sourceY = 0, -- wysokość klatki hBarb dla tej animacji - wysokość klatki
+        sourceHeight = 110, -- wysokość klatki hBarb dla tej animacji
+        sourceWidth = 68, -- szerokość klatki
+        count = 8, -- ilość klatek w jednym wierszu pliku png
+        time = 1000 -- czas trwania animacji
     }
 }
 
