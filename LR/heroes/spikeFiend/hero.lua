@@ -1,6 +1,11 @@
 --główny obiekt który będzie zwracany jako heros
 local class = {}
 
+--czasy animacji (łatwiej bd zmienić)
+
+local runTime = 1000
+local neutralTime = 1200
+
 --opcje neutralnej strony (to trzeba powielić dla wszystkich rodzajów animacji)
 local h_neutral_SheetOption = {
     width = 87,
@@ -19,7 +24,7 @@ local sequences_h = {
         sheet = sheet_h_neutral,
         start = 9,
         count = 8,
-        time = 1200,
+        time = neutralTime,
         loopCount = 0,
         loopDirection = "forward"
     },
@@ -28,7 +33,7 @@ local sequences_h = {
         sheet = sheet_h_neutral,
         start = 17,
         count = 8,
-        time = 1200,
+        time = neutralTime,
         loopCount = 0,
         loopDirection = "forward"
     },
@@ -37,7 +42,7 @@ local sequences_h = {
         sheet = sheet_h_neutral,
         start = 25,
         count = 8,
-        time = 1200,
+        time = neutralTime,
         loopCount = 0,
         loopDirection = "forward"
     },
@@ -46,7 +51,7 @@ local sequences_h = {
         sheet = sheet_h_neutral,
         start = 33,
         count = 8,
-        time = 1200,
+        time = neutralTime,
         loopCount = 0,
         loopDirection = "forward"
     },
@@ -55,7 +60,7 @@ local sequences_h = {
         sheet = sheet_h_neutral,
         start = 41,
         count = 8,
-        time = 1200,
+        time = neutralTime,
         loopCount = 0,
         loopDirection = "forward"
     },
@@ -64,7 +69,7 @@ local sequences_h = {
         sheet = sheet_h_neutral,
         start = 49,
         count = 8,
-        time = 1200,
+        time = neutralTime,
         loopCount = 0,
         loopDirection = "forward"
     },
@@ -73,7 +78,7 @@ local sequences_h = {
         sheet = sheet_h_neutral,
         start = 57,
         count = 8,
-        time = 1200,
+        time = neutralTime,
         loopCount = 0,
         loopDirection = "forward"
     },
@@ -82,7 +87,7 @@ local sequences_h = {
         sheet = sheet_h_neutral,
         start = 1,
         count = 8,
-        time = 1200,
+        time = neutralTime,
         loopCount = 0,
         loopDirection = "forward"
     }

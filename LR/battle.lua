@@ -216,7 +216,7 @@ function scene:show( event )
 
 	elseif ( phase == "did" ) then
 		-- Code here runs when the scene is entirely on screen
-        gameLoopTimer = timer.performWithDelay( 150, gameLoop, 0 )
+        gameLoopTimer = timer.performWithDelay( 15, gameLoop, 0 )
 
 	end
 end
