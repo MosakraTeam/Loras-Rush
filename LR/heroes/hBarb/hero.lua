@@ -78,7 +78,7 @@ local function hero(group, x, y, name)
 
     --statystyki herosa
     h['stats'] = {}
-    h['stats']['movementSpeed'] = 2
+    h['stats']['movementSpeed'] = 4
 
     --flagi herosa
     h['flags'] = {}

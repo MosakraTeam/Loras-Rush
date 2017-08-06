@@ -110,16 +110,12 @@ function checkColision(hero,enemy)
 
     if (sumW > difX) and (sumH > difY) then
         hero['flags']['canMove'] = false
-        enemy['flags']['canMove'] = false
 
         hero['seqName'] = 'neutral'
-        enemy['seqName'] = 'neutral'
     else
         hero['flags']['canMove'] = true
-        enemy['flags']['canMove'] = true
 
         hero['seqName'] = 'run'
-        enemy['seqName'] = 'run'
     end
 end
 
@@ -178,7 +174,10 @@ end
 local function gameLoop()
     toSprite(barbarian,stworek)
     toSprite(stworek,barbarian)
+    toSprite(stworek2,barbarian)
     checkColision(barbarian,stworek)
+    checkColision(stworek,barbarian)
+    checkColision(stworek2,barbarian)
     setGroupOrder(mainGroup)
     --debugSpritePrint(barbarian['sprite'])
     --debugSpritePrint(stworek['sprite'])
@@ -213,6 +212,7 @@ function scene:create( event )
     barbarian = hBarb.hero(mainGroup, display.actualContentWidth/2, display.actualContentHeight/2, 'barbarian')
 
     stworek = spikeFiend.hero(mainGroup, display.actualContentWidth/2 - 50, 50, 'stworek')
+    stworek2 = spikeFiend.hero(mainGroup, display.actualContentWidth/2 + 50, 310, 'stworek2')
 
     background:addEventListener( "touch", moveEnemy )
 end
