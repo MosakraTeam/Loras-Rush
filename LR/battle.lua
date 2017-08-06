@@ -3,6 +3,9 @@ local composer = require( "composer" )
 
 local scene = composer.newScene()
 
+local hBarb = require("heroes.hBarb")
+local hBarb2 = require("heroes.hBarb")
+
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
@@ -13,181 +16,11 @@ local grassGroup
 local mainGroup
 local uiGroup
 
-local barbarian = {}
-
-barbarian['stats'] = {}
-barbarian['stats']['movementSpeed'] = 2
-barbarian['flags'] = {}
-barbarian['flags']['canMove'] = true
-barbarian['seqName'] = "neutral"
-
 local stworek = {}
 
-stworek['stats'] = {}
-stworek['stats']['movementSpeed'] = 1
-stworek['flags'] = {}
-stworek['flags']['canMove'] = true
-stworek['seqName'] = "neutral"
+local barbarian = {}
 
 local gameLoopTimer
-
-local hBarb_neutralSheetOption =
-{
-    width = 72,
-    height = 103,
-    numFrames = 128
-}
-
-local sheet_hBarb_neutral = graphics.newImageSheet( "images/hBarb-neutral.png", hBarb_neutralSheetOption )
-
--- sequences table
-local sequences_hBarb_neutral = {
-    -- consecutive frames sequence
-    {
-        name = "neutral-7",
-        sheet = sheet_hBarb_neutral,
-        start = 9,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-75",
-        sheet = sheet_hBarb_neutral,
-        start = 17,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-8",
-        sheet = sheet_hBarb_neutral,
-        start = 25,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-9",
-        sheet = sheet_hBarb_neutral,
-        start = 33,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-10",
-        sheet = sheet_hBarb_neutral,
-        start = 41,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-105",
-        sheet = sheet_hBarb_neutral,
-        start = 49,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-11",
-        sheet = sheet_hBarb_neutral,
-        start = 57,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-12",
-        sheet = sheet_hBarb_neutral,
-        start = 65,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-1",
-        sheet = sheet_hBarb_neutral,
-        start = 73,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-15",
-        sheet = sheet_hBarb_neutral,
-        start = 81,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-2",
-        sheet = sheet_hBarb_neutral,
-        start = 89,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-3",
-        sheet = sheet_hBarb_neutral,
-        start = 97,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-4",
-        sheet = sheet_hBarb_neutral,
-        start = 105,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-45",
-        sheet = sheet_hBarb_neutral,
-        start = 113,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-5",
-        sheet = sheet_hBarb_neutral,
-        start = 121,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    },
-    {
-        name = "neutral-6",
-        sheet = sheet_hBarb_neutral,
-        start = 1,
-        count = 8,
-        time = 1200,
-        loopCount = 0,
-        loopDirection = "forward"
-    }
-}
 
 -- -----------------------------------------------------------------------------------
 -- Main Loop functions
@@ -228,7 +61,7 @@ function setGroupOrder(group)
 end
 
 function setAnimation(hero, x,y)
-    local seq
+    local seq = '45'
     local sin225 = math.sin(math.rad(22,5))
     local sin675 = math.sin(math.rad(67,5))
     if (y >= 0) and (x >= sin225) and (x < sin675) then seq = "15" 
@@ -241,7 +74,12 @@ function setAnimation(hero, x,y)
     elseif (math.abs(x) < sin225) and (y >= 0) then seq = "12"
     end
 
-    hero['sprite']:setSequence(hero['seqName'] .. '-' .. seq)
+    if not (hero['sprite'].sequence == hero['seqName'] .. '-' .. seq) then
+        frame = hero['sprite'].frame
+        hero['sprite']:setSequence(hero['seqName'] .. '-' .. seq)
+        hero['sprite']:setFrame(frame)
+        hero['sprite']:play()
+    end
     
 end
 
@@ -314,11 +152,17 @@ function moveEnemy(event) --temporary
     stworek['sprite'].y = event.y
 end
 
+function debugSpritePrint(sprite) 
+    print(sprite.myName .. ' ' .. sprite.x .. ' ' .. sprite.y)
+end
+
 local function gameLoop()
     toSprite(barbarian,stworek)
     toSprite(stworek,barbarian)
     checkColision(barbarian,stworek)
     setGroupOrder(mainGroup)
+    debugSpritePrint(barbarian['sprite'])
+    debugSpritePrint(stworek['sprite'])
 end
 
 -- -----------------------------------------------------------------------------------
@@ -347,21 +191,9 @@ function scene:create( event )
     local background = display.newRect(backGroup,display.actualContentWidth/2,display.actualContentHeight/2,display.actualContentWidth,display.actualContentHeight)
 	background:setFillColor(0,1,1,1);
 
-    barbarian['sprite'] = display.newSprite(mainGroup, sheet_hBarb_neutral, sequences_hBarb_neutral )
-    barbarian['sprite'].x = display.actualContentWidth/2
-    barbarian['sprite'].y = display.actualContentHeight/2
-    barbarian['sprite'].myName = "barbarian"
+    barbarian = hBarb.hero(mainGroup, display.actualContentWidth/2, display.actualContentHeight/2, 'barbarian')
 
-    barbarian['sprite']:setSequence( "neutral-45" )
-    barbarian['sprite']:play()
-
-    stworek['sprite'] = display.newSprite(mainGroup, sheet_hBarb_neutral, sequences_hBarb_neutral )
-    stworek['sprite'].x = 280
-    stworek['sprite'].y = 0
-    stworek['sprite'].myName = "stworek"
-
-    stworek['sprite']:setSequence( "neutral-105" )
-    stworek['sprite']:play()
+    stworek = hBarb2.hero(mainGroup, display.actualContentWidth/2 - 50, 50, 'stworek')
 
     background:addEventListener( "touch", moveEnemy )
 end
@@ -378,7 +210,7 @@ function scene:show( event )
 
 	elseif ( phase == "did" ) then
 		-- Code here runs when the scene is entirely on screen
-        gameLoopTimer = timer.performWithDelay( 15, gameLoop, 0 )
+        gameLoopTimer = timer.performWithDelay( 150, gameLoop, 0 )
 
 	end
 end
