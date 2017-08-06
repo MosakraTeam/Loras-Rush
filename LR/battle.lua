@@ -75,8 +75,14 @@ function setAnimation(hero, x,y)
 
     if not (hero['sprite'].sequence == hero['seqName'] .. '-' .. seq) then
         frame = hero['sprite'].frame
+        mainName = string.gmatch(hero['sprite'].sequence,'-')
+
         hero['sprite']:setSequence(hero['seqName'] .. '-' .. seq)
-        hero['sprite']:setFrame(frame)
+
+        if mainName == hero['seqName'] then
+            hero['sprite']:setFrame(frame)
+        end
+        
         hero['sprite']:play()
     end
     
