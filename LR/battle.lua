@@ -42,20 +42,26 @@ function setGroupOrder(group)
 
     tmpitmp = itmp
 
-    for i=1,group.numChildren-1 do
-        for j=1,group.numChildren do
-            if group[itmp[i]].y > group[itmp[j]].y then
+    for j=1,group.numChildren do
+        for i=1,group.numChildren-1 do
+            if group[itmp[i]].y > group[itmp[i+1]].y then
                 tmp = itmp[i]
-                itmp[i] = itmp[j]
-                itmp[j] = tmp
+                itmp[i] = itmp[i+1]
+                itmp[i+1] = tmp
                 canSort = true
             end
         end
     end
+
+    for i=1,group.numChildren do
+        print(itmp[i])
+    end
+
+    print('-------------------------')
     
     if canSort then
         for i=1,group.numChildren do
-            group[itmp[i]]:toFront()
+            group:insert(i,group[itmp[i]])
         end
     end
 end
@@ -172,13 +178,13 @@ function debugSpritePrint(sprite)
 end
 
 local function gameLoop()
+    setGroupOrder(mainGroup)
     toSprite(barbarian,stworek)
     toSprite(stworek,barbarian)
     toSprite(stworek2,barbarian)
     checkColision(barbarian,stworek)
     checkColision(stworek,barbarian)
     checkColision(stworek2,barbarian)
-    setGroupOrder(mainGroup)
     --debugSpritePrint(barbarian['sprite'])
     --debugSpritePrint(stworek['sprite'])
 end
