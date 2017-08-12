@@ -8,6 +8,8 @@ local spikeFiend = require("heroes.spikeFiend.hero")
 
 local heroes = {}
 local enemies = {}
+
+local hpui = {}
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
@@ -296,13 +298,25 @@ function debugSpritePrint(sprite)
     print(sprite.sequence)
 end
 
+function createStatsUI(group,y)
+    count = 0
+    for i,v in pairs(group) do
+        if v['flags']['isAlive'] then
+            hpui[v['sprite'].myName] = display.newText( uiGroup, v['sprite'].myName .. ' hp: ' .. v['stats']['hp'], 0, y + 14 * count, native.systemFont, 12 )
+            hpui[v['sprite'].myName].x = hpui[v['sprite'].myName].width/2 + 2
+            count = count + 1
+        end
+    end
+end
+
 function showHP(group)
     for i,v in pairs(group) do
         if v['flags']['isAlive'] then
-            print(v['sprite'].myName .. ' hp: ' .. v['stats']['hp'])
+            hpui[v['sprite'].myName].text = v['sprite'].myName .. ' hp: ' .. v['stats']['hp']
+        else
+            hpui[v['sprite'].myName].text = v['sprite'].myName .. ' is death'
         end
     end
-    print('----------------------')
 end
 
 local function gameLoop()
@@ -398,6 +412,9 @@ function scene:create( event )
     stworek5['myEnemies'] = heroes
 
     background:addEventListener( "touch", moveEnemy )
+
+    createStatsUI(heroes, 7)
+    createStatsUI(enemies, 7 + #heroes * 14)
 end
 
 
