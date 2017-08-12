@@ -32,3 +32,5 @@ TODO: ----------------------------------------------
   
 8. System wyliczania threatu.
   Znając dps danego npc możemy wyliczyć wściekłość na niego. Trzeba to dogłębnie przemyśleć. Czy liczyć tylko dmg. Czy dać współczynnik bazowy mnożony przez dmg i inne wartości (wtedy tank może mieć go więcej pomimo małego dmg). Threat będzie trzeba liczyć inaczej dla bohaterów gracza i inaczej dla mobów (one mają tylko lvl bez dodatkowych boostów w postaci broni).
+  
+9. System healowanie :) 
