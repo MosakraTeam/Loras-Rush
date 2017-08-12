@@ -27,9 +27,9 @@ local gameLoopTimer
 -- -----------------------------------------------------------------------------------
 
 function randomHero(enemy)
---tablica herosów
---mlem = math.rand(5)
---return heroTable[mlem]
+    --tablica herosów
+    --mlem = math.rand(5)
+    --return heroTable[mlem]
 end
 
 function setGroupOrder(group)
@@ -40,7 +40,7 @@ function setGroupOrder(group)
         table.insert(itmp,i)
     end
 
-    tmpitmp = itmp
+    --tmpitmp = itmp
 
     for j=1,group.numChildren do
         for i=1,group.numChildren-1 do
@@ -52,12 +52,6 @@ function setGroupOrder(group)
             end
         end
     end
-
-    for i=1,group.numChildren do
-        print(itmp[i])
-    end
-
-    print('-------------------------')
     
     if canSort then
         for i=1,group.numChildren do
@@ -80,8 +74,6 @@ function setAnimation(hero, x,y)
     elseif (math.abs(x) < sin225) and (y >= 0) then seq = "12"
     end
 
-    --print(hero['seqName'])
-
     if not (hero['sprite'].sequence == hero['seqName'] .. '-' .. seq) then
         frame = hero['sprite'].frame
         mainName = string.gmatch(hero['sprite'].sequence,'-')
@@ -94,7 +86,6 @@ function setAnimation(hero, x,y)
         
         hero['sprite']:play()
     end
-    
 end
 
 function checkColision(hero,enemy)
