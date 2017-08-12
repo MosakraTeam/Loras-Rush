@@ -47,10 +47,12 @@ function death(hero)
 end
 
 function attackEnemy(hero,enemy)
-    enemy['stats']['hp'] = enemy['stats']['hp'] - hero['stats']['dmg']
-    if enemy['stats']['hp'] <= 0 then
-        death(enemy)
-        checkThreat(hero,hero['myEnemies'])
+    if enemy['flags']['isAlive'] then
+        enemy['stats']['hp'] = enemy['stats']['hp'] - hero['stats']['dmg']
+        if enemy['stats']['hp'] <= 0 then
+            death(enemy)
+            checkThreat(hero,hero['myEnemies'])
+        end
     end
 
     print(enemy['sprite'].myName .. ' hp: ' .. enemy['stats']['hp'])
@@ -64,7 +66,13 @@ function checkAnimation(event)
 	elseif ( event.phase == "ended" ) then 
 
     elseif ( event.phase == "loop") then
-        if not (string.gmatch(sprite.sequence,"attack_1") == nil) then
+        local flag = nil
+
+        for i in string.gmatch(sprite.sequence,"attack_1") do
+            if not (i == nil) then flag = i end
+        end
+
+        if flag == 'attack_1' then
             for i,v in pairs(heroes) do
                 if sprite.myName == v['sprite'].myName then
                     hero = v
@@ -229,7 +237,10 @@ function checkColision(hero,enemy)
 
             hero['seqName'] = 'run'
         end
+    else
+        setNeutral(hero)
     end
+    
 end
 
 function toPoint(hero,xy)
@@ -272,6 +283,8 @@ function toSprite(hero,enemy)
             hero['sprite'].x = hero['sprite'].x + directionX * speed
             hero['sprite'].y = hero['sprite'].y - directionY * speed
         end
+    else
+        setAnimation(hero, 0, -1)
     end
 end
 
@@ -349,21 +362,29 @@ function scene:create( event )
     stworek['myGroup'] = enemies
     stworek['myEnemies'] = heroes
 
-    --[[stworek2 = spikeFiend.hero(mainGroup, 590, 120, 'stworek2')
-    stworek2['stats']['threat'] = 403
+    stworek2 = spikeFiend.hero(mainGroup, 590, 120, 'stworek2')
+    stworek2['stats']['threat'] = 103
     table.insert(enemies,stworek2)
+    stworek2['myGroup'] = enemies
+    stworek2['myEnemies'] = heroes
 
     stworek3 = spikeFiend.hero(mainGroup, 590, 180, 'stworek3')
     stworek3['stats']['threat'] = 303
     table.insert(enemies,stworek3)
+    stworek3['myGroup'] = enemies
+    stworek3['myEnemies'] = heroes
 
     stworek4 = spikeFiend.hero(mainGroup, 590, 240, 'stworek4')
     stworek4['stats']['threat'] = 203
     table.insert(enemies,stworek4)
+    stworek4['myGroup'] = enemies
+    stworek4['myEnemies'] = heroes
 
     stworek5 = spikeFiend.hero(mainGroup, 590, 320, 'stworek5')
     stworek5['stats']['threat'] = 103
-    table.insert(enemies,stworek5)]]
+    table.insert(enemies,stworek5)
+    stworek5['myGroup'] = enemies
+    stworek5['myEnemies'] = heroes
 
     background:addEventListener( "touch", moveEnemy )
 end
