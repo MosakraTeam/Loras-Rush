@@ -14,7 +14,9 @@ local sheetOptions = {
         sourceHeight = 103, -- zostawić 103
         sourceWidth = 72, -- szerokość klatki
         count = 8, -- ilość klatek w jednym wierszu pliku png
-        time = 1200 -- czas trwania animacji
+        time = 1200, -- czas trwania animacji
+        offsetX = 0,
+        offsetY = 0
     },
     run = {
         width = 68, -- szerokość klatki
@@ -22,10 +24,25 @@ local sheetOptions = {
         numFrames = 128, -- łączna liczba wszystkich klatek w pliku png
         sourceX = 0, -- zostawić 0
         sourceY = 0, -- wysokość klatki hBarb dla tej animacji - wysokość klatki
-        sourceHeight = 110, -- wysokość klatki hBarb dla tej animacji
+        sourceHeight = 142, -- wysokość klatki hBarb dla tej animacji
         sourceWidth = 68, -- szerokość klatki
         count = 8, -- ilość klatek w jednym wierszu pliku png
-        time = 1000 -- czas trwania animacji
+        time = 1000, -- czas trwania animacji
+        offsetX = 0,
+        offsetY = 0
+    },
+    attack_1 = {
+        width = 182, -- szerokość klatki
+        height = 142, -- wysokość klatki
+        numFrames = 256, -- łączna liczba wszystkich klatek w pliku png
+        sourceX = 0, -- zostawić 0
+        sourceY = 0, -- wysokość klatki hBarb dla tej animacji - wysokość klatki
+        sourceHeight = 142, -- wysokość klatki hBarb dla tej animacji
+        sourceWidth = 182, -- szerokość klatki
+        count = 16, -- ilość klatek w jednym wierszu pliku png
+        time = 1000, -- czas trwania animacji
+        offsetX = 0,
+        offsetY = 50
     }
 }
 
@@ -70,22 +87,32 @@ end
 local function hero(group, x, y, name)
     --główny obiekt herosa
 
+    local h = {}
+
+    h['offset'] = {}
+
     for k,v in pairs(sheetOptions) do
         createSequences(sequences_h, k)
+        h['offset'][k] = {}
+        h['offset'][k]['x'] = v['offsetX']
+        h['offset'][k]['y'] = v['offsetY']
     end
-
-    local h = {}
 
     --statystyki herosa
     h['stats'] = {}
     h['stats']['movementSpeed'] = 4
+    h['stats']['hp'] = 500
+    h['stats']['dmg'] = 20
 
     --flagi herosa
     h['flags'] = {}
     h['flags']['canMove'] = true
+    h['flags']['isAlive'] = true
 
     --nazwa początkowej sekwencji
     h['seqName'] = "neutral"
+
+    h['myEnemy'] = nil
 
     --tworzenie sprite o podanej grupie, pozycji i nazwie
     h['sprite'] = display.newSprite(group, sheets['neutral'], sequences_h )

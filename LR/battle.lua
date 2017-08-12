@@ -6,6 +6,8 @@ local scene = composer.newScene()
 local hBarb = require("heroes.hBarb.hero")
 local spikeFiend = require("heroes.spikeFiend.hero")
 
+local heroes = {}
+local enemies = {}
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
@@ -30,6 +32,118 @@ function randomHero(enemy)
     --tablica herosów
     --mlem = math.rand(5)
     --return heroTable[mlem]
+end
+
+function setNeutral(hero)
+    hero['seqName'] = 'neutral'
+end
+
+function death(hero)
+    if not (hero == nil) then
+        hero['sprite']:removeEventListener("sprite",checkAnimation)
+        hero['sprite'].alpha = 0
+        hero['flags']['isAlive'] = false
+    end
+end
+
+function attackEnemy(hero,enemy)
+    enemy['stats']['hp'] = enemy['stats']['hp'] - hero['stats']['dmg']
+    if enemy['stats']['hp'] <= 0 then
+        death(enemy)
+        checkThreat(hero,hero['myEnemies'])
+    end
+
+    print(enemy['sprite'].myName .. ' hp: ' .. enemy['stats']['hp'])
+end
+
+function checkAnimation(event)
+    sprite = event.target
+    hero = nil
+    if ( event.phase == "began" ) then 
+
+	elseif ( event.phase == "ended" ) then 
+
+    elseif ( event.phase == "loop") then
+        if not (string.gmatch(sprite.sequence,"attack_1") == nil) then
+            for i,v in pairs(heroes) do
+                if sprite.myName == v['sprite'].myName then
+                    hero = v
+                end
+            end
+
+            if hero == nil then
+                for i,v in pairs(enemies) do
+                    if sprite.myName == v['sprite'].myName then
+                        hero = v
+                    end
+                end
+            end
+            attackEnemy(hero,hero['myEnemy'])
+        end
+    end
+end
+
+function setGroupAnimationListener(group)
+    for i,v in pairs(group) do
+        v['sprite']:addEventListener( "sprite", checkAnimation )
+    end
+end
+
+function checkGroupCollision(group)
+    for i,v in pairs(group) do
+        if v['flags']['isAlive'] then
+            checkColision(v,v['myEnemy'])
+        end
+    end
+end
+
+function moveGroupSprite(group)
+    for i,v in pairs(group) do
+        if v['flags']['isAlive'] then
+            toSprite(v,v['myEnemy'])
+        end
+    end
+end
+
+function checkGroupThreat(group,enemy)
+    for i,v in pairs(group) do
+        checkThreat(v,enemy)
+        print(v['myEnemy']['sprite'].myName)
+    end
+end
+
+function checkThreat(hero, group)
+    if hero['flags']['isAlive'] then
+        local myThreat = hero['stats']['threat']
+        local biggestThreat = -1
+        local similarThreat = {}
+
+        for i,v in pairs(group) do
+            if v['flags']['isAlive'] then
+                if (0.9 * myThreat <= v['stats']['threat']) and (1.1 * myThreat >= v['stats']['threat']) then
+                    table.insert(similarThreat,i)
+                end
+
+                if (biggestThreat == -1) or (v['stats']['threat'] > group[biggestThreat]['stats']['threat']) then
+                    biggestThreat = i
+                end
+            end
+        end
+
+        if #similarThreat == 0 then
+            if not (biggestThreat == -1) then
+                print(group[biggestThreat]['sprite'].myName)
+                hero['myEnemy'] = group[biggestThreat]
+            else
+                print('neutral')
+                setNeutral(hero)
+            end
+        else
+            print(#similarThreat)
+            hero['myEnemy'] = group[similarThreat[math.random(#similarThreat)]]
+            print(hero['myEnemy']['sprite'].myName)
+        end
+    end
 end
 
 function setGroupOrder(group)
@@ -89,30 +203,32 @@ function setAnimation(hero, x,y)
 end
 
 function checkColision(hero,enemy)
-    x1 = hero['sprite'].x
-    y1 = hero['sprite'].y
-    w1 = hero['sprite'].width/4
-    h1 = hero['sprite'].height/4
+    if (not (enemy == nil)) and enemy['flags']['isAlive'] then
+        x1 = hero['sprite'].x
+        y1 = hero['sprite'].y
+        w1 = hero['sprite'].width/4
+        h1 = hero['sprite'].height/8
 
-    x2 = enemy['sprite'].x
-    y2 = enemy['sprite'].y
-    w2 = enemy['sprite'].width/4
-    h2 = enemy['sprite'].height/4
+        x2 = enemy['sprite'].x
+        y2 = enemy['sprite'].y
+        w2 = enemy['sprite'].width/4
+        h2 = enemy['sprite'].height/8
 
-    difX = math.abs(x1 - x2)
-    difY = math.abs(y1 - y2)
+        difX = math.abs(x1 - x2)
+        difY = math.abs(y1 - y2)
 
-    sumW = w1 + w2
-    sumH = h1 + h2
+        sumW = w1 + w2
+        sumH = h1 + h2
 
-    if (sumW > difX) and (sumH > difY) then
-        hero['flags']['canMove'] = false
+        if (sumW > difX) and (sumH > difY) then
+            hero['flags']['canMove'] = false
 
-        hero['seqName'] = 'neutral'
-    else
-        hero['flags']['canMove'] = true
+            hero['seqName'] = 'attack_1'
+        else
+            hero['flags']['canMove'] = true
 
-        hero['seqName'] = 'run'
+            hero['seqName'] = 'run'
+        end
     end
 end
 
@@ -138,23 +254,24 @@ function toPoint(hero,xy)
 end
 
 function toSprite(hero,enemy)
-    
-    startX = hero['sprite'].x
-    startY = hero['sprite'].y
-    endX = enemy['sprite'].x
-    endY = enemy['sprite'].y
-    speed = hero['stats']['movementSpeed']
+    if (not (enemy == nil)) and enemy['flags']['isAlive'] then
+        startX = hero['sprite'].x
+        startY = hero['sprite'].y
+        endX = enemy['sprite'].x
+        endY = enemy['sprite'].y
+        speed = hero['stats']['movementSpeed']
 
-    distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
+        distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
 
-    directionX = (endX-startX) / distance;
-    directionY = (startY-endY) / distance;
+        directionX = (endX-startX) / distance;
+        directionY = (startY-endY) / distance;
 
-    setAnimation(hero, directionX, directionY)
-    
-    if hero['flags']['canMove'] then
-        hero['sprite'].x = hero['sprite'].x + directionX * speed
-        hero['sprite'].y = hero['sprite'].y - directionY * speed
+        setAnimation(hero, directionX, directionY)
+        
+        if hero['flags']['canMove'] then
+            hero['sprite'].x = hero['sprite'].x + directionX * speed
+            hero['sprite'].y = hero['sprite'].y - directionY * speed
+        end
     end
 end
 
@@ -170,12 +287,10 @@ end
 
 local function gameLoop()
     setGroupOrder(mainGroup)
-    toSprite(barbarian,stworek)
-    toSprite(stworek,barbarian)
-    toSprite(stworek2,barbarian)
-    checkColision(barbarian,stworek)
-    checkColision(stworek,barbarian)
-    checkColision(stworek2,barbarian)
+    moveGroupSprite(heroes)
+    moveGroupSprite(enemies)
+    checkGroupCollision(heroes)
+    checkGroupCollision(enemies)
     --debugSpritePrint(barbarian['sprite'])
     --debugSpritePrint(stworek['sprite'])
 end
@@ -206,10 +321,49 @@ function scene:create( event )
     local background = display.newRect(backGroup,display.actualContentWidth/2,display.actualContentHeight/2,display.actualContentWidth,display.actualContentHeight)
 	background:setFillColor(0,1,1,1);
 
-    barbarian = hBarb.hero(mainGroup, display.actualContentWidth/2, display.actualContentHeight/2, 'barbarian')
+    barbarian = hBarb.hero(mainGroup, 50, 60, 'barbarian')
+    barbarian['stats']['threat'] = 100
+    table.insert(heroes,barbarian)
+    barbarian['myGroup'] = heroes
+    barbarian['myEnemies'] = enemies
 
-    stworek = spikeFiend.hero(mainGroup, display.actualContentWidth/2 - 50, 50, 'stworek')
-    stworek2 = spikeFiend.hero(mainGroup, display.actualContentWidth/2 + 50, 310, 'stworek2')
+    --[[barbarian2 = hBarb.hero(mainGroup, 50, 120, 'barbarian2')
+    barbarian2['stats']['threat'] = 200
+    table.insert(heroes,barbarian2)
+
+    barbarian3 = hBarb.hero(mainGroup, 50, 180, 'barbarian3')
+    barbarian3['stats']['threat'] = 300
+    table.insert(heroes,barbarian3)
+
+    barbarian4 = hBarb.hero(mainGroup, 50, 240, 'barbarian4')
+    barbarian4['stats']['threat'] = 400
+    table.insert(heroes,barbarian4)
+
+    barbarian5 = hBarb.hero(mainGroup, 50, 320, 'barbarian5')
+    barbarian5['stats']['threat'] = 500
+    table.insert(heroes,barbarian5)]]
+
+    stworek = spikeFiend.hero(mainGroup, 590, 60, 'stworek')
+    stworek['stats']['threat'] = 100
+    table.insert(enemies,stworek)
+    stworek['myGroup'] = enemies
+    stworek['myEnemies'] = heroes
+
+    --[[stworek2 = spikeFiend.hero(mainGroup, 590, 120, 'stworek2')
+    stworek2['stats']['threat'] = 403
+    table.insert(enemies,stworek2)
+
+    stworek3 = spikeFiend.hero(mainGroup, 590, 180, 'stworek3')
+    stworek3['stats']['threat'] = 303
+    table.insert(enemies,stworek3)
+
+    stworek4 = spikeFiend.hero(mainGroup, 590, 240, 'stworek4')
+    stworek4['stats']['threat'] = 203
+    table.insert(enemies,stworek4)
+
+    stworek5 = spikeFiend.hero(mainGroup, 590, 320, 'stworek5')
+    stworek5['stats']['threat'] = 103
+    table.insert(enemies,stworek5)]]
 
     background:addEventListener( "touch", moveEnemy )
 end
@@ -226,6 +380,10 @@ function scene:show( event )
 
 	elseif ( phase == "did" ) then
 		-- Code here runs when the scene is entirely on screen
+        setGroupAnimationListener(heroes)
+        setGroupAnimationListener(enemies)
+        checkGroupThreat(heroes,enemies)
+        checkGroupThreat(enemies,heroes)
         gameLoopTimer = timer.performWithDelay( 15, gameLoop, 0 )
 
 	end
