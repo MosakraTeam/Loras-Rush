@@ -48,14 +48,12 @@ end
 
 function attackEnemy(hero,enemy)
     if enemy['flags']['isAlive'] then
-        enemy['stats']['hp'] = enemy['stats']['hp'] - hero['stats']['dmg']
+        enemy['stats']['hp'] = enemy['stats']['hp'] - ( hero['stats']['dmg'] + math.random(hero['stats']['dmg'] * 0.2) )
         if enemy['stats']['hp'] <= 0 then
             death(enemy)
             checkThreat(hero,hero['myEnemies'])
         end
     end
-
-    print(enemy['sprite'].myName .. ' hp: ' .. enemy['stats']['hp'])
 end
 
 function checkAnimation(event)
@@ -298,12 +296,23 @@ function debugSpritePrint(sprite)
     print(sprite.sequence)
 end
 
+function showHP(group)
+    for i,v in pairs(group) do
+        if v['flags']['isAlive'] then
+            print(v['sprite'].myName .. ' hp: ' .. v['stats']['hp'])
+        end
+    end
+    print('----------------------')
+end
+
 local function gameLoop()
     setGroupOrder(mainGroup)
     moveGroupSprite(heroes)
     moveGroupSprite(enemies)
     checkGroupCollision(heroes)
     checkGroupCollision(enemies)
+    showHP(heroes)
+    showHP(enemies)
     --debugSpritePrint(barbarian['sprite'])
     --debugSpritePrint(stworek['sprite'])
 end
@@ -340,11 +349,13 @@ function scene:create( event )
     barbarian['myGroup'] = heroes
     barbarian['myEnemies'] = enemies
 
-    --[[barbarian2 = hBarb.hero(mainGroup, 50, 120, 'barbarian2')
+    barbarian2 = hBarb.hero(mainGroup, 50, 120, 'barbarian2')
     barbarian2['stats']['threat'] = 200
     table.insert(heroes,barbarian2)
+    barbarian2['myGroup'] = heroes
+    barbarian2['myEnemies'] = enemies
 
-    barbarian3 = hBarb.hero(mainGroup, 50, 180, 'barbarian3')
+    --[[barbarian3 = hBarb.hero(mainGroup, 50, 180, 'barbarian3')
     barbarian3['stats']['threat'] = 300
     table.insert(heroes,barbarian3)
 
