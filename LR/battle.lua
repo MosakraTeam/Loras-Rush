@@ -140,16 +140,12 @@ function checkThreat(hero, group)
 
         if #similarThreat == 0 then
             if not (biggestThreat == -1) then
-                print(group[biggestThreat]['sprite'].myName)
                 hero['myEnemy'] = group[biggestThreat]
             else
-                print('neutral')
                 setNeutral(hero)
             end
         else
-            print(#similarThreat)
             hero['myEnemy'] = group[similarThreat[math.random(#similarThreat)]]
-            print(hero['myEnemy']['sprite'].myName)
         end
     end
 end
@@ -313,8 +309,10 @@ function showHP(group)
     for i,v in pairs(group) do
         if v['flags']['isAlive'] then
             hpui[v['sprite'].myName].text = v['sprite'].myName .. ' hp: ' .. v['stats']['hp']
+            hpui[v['sprite'].myName].x = hpui[v['sprite'].myName].width/2 + 2
         else
             hpui[v['sprite'].myName].text = v['sprite'].myName .. ' is death'
+            hpui[v['sprite'].myName].x = hpui[v['sprite'].myName].width/2 + 2
         end
     end
 end
