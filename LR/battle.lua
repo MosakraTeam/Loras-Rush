@@ -21,6 +21,8 @@ local hpui = {}
 local backGroup
 local grassGroup
 local mainGroup
+local hpBarsBGGroup
+local hpBarsAGroup
 local uiGroup
 
 local stworek = {}
@@ -396,16 +398,30 @@ function createStatsUI(group,y)
             hpui[v['sprite'].myName] = display.newText( uiGroup, v['sprite'].myName .. ' hp: ' .. v['stats']['hp'], 0, y + 14 * count, native.systemFont, 12 )
             hpui[v['sprite'].myName].x = hpui[v['sprite'].myName].width/2 + 2
             count = count + 1
+            hpbar = display.newRect(hpBarsBGGroup,v['sprite'].x, v['sprite'].y - v['sprite'].height - 5, 40, 5)
+            v['myHPBarBG'] = hpbar
+            hpbar:setFillColor(0,0,0,1);
+
+            hpbara = display.newRect(hpBarsAGroup,v['sprite'].x, v['sprite'].y - v['sprite'].height - 5, 38, 3)
+            v['myHPBarA'] = hpbara
+            hpbara:setFillColor(255,0,0,1);
         end
     end
 end
 
 function showHP(group)
     for i,v in pairs(group) do
+        v['myHPBarBG'].x = v['sprite'].x
+        v['myHPBarBG'].y = v['sprite'].y - v['sprite'].height - 5
         if v['flags']['isAlive'] then
+            v['myHPBarA'].width = 38 * v['stats']['hp'] / v['stats']['maxhp']
+            v['myHPBarA'].x = v['sprite'].x - ( 38 * ( v['stats']['maxhp'] - v['stats']['hp'] ) / v['stats']['maxhp'] ) / 2
+            v['myHPBarA'].y = v['sprite'].y - v['sprite'].height - 5
             hpui[v['sprite'].myName].text = v['sprite'].myName .. ' hp: ' .. v['stats']['hp'] .. ' ' .. v['myEnemy']['sprite'].myName
             hpui[v['sprite'].myName].x = hpui[v['sprite'].myName].width/2 + 2
         else
+            v['myHPBarBG'].alpha = 0
+            v['myHPBarA'].alpha = 0
             hpui[v['sprite'].myName].text = v['sprite'].myName .. ' is death' .. ' ' .. v['myEnemy']['sprite'].myName
             hpui[v['sprite'].myName].x = hpui[v['sprite'].myName].width/2 + 2
         end
@@ -447,6 +463,13 @@ function scene:create( event )
 	mainGroup = display.newGroup()  -- Display group for the ship, asteroids, lasers, etc.
 	sceneGroup:insert( mainGroup )  -- Insert into the scene's view group
 
+    hpBarsBGGroup = display.newGroup()  -- Display group for the ship, asteroids, lasers, etc.
+	sceneGroup:insert( hpBarsBGGroup )  -- Insert into the scene's view group
+
+    hpBarsAGroup = display.newGroup()  -- Display group for the ship, asteroids, lasers, etc.
+	sceneGroup:insert( hpBarsAGroup )  -- Insert into the scene's view group
+
+
 	uiGroup = display.newGroup()    -- Display group for UI objects like the score
 	sceneGroup:insert( uiGroup )    -- Insert into the scene's view group
 
@@ -454,13 +477,13 @@ function scene:create( event )
 	background:setFillColor(0,1,1,1);
 
     barbarian = hBarb.hero(mainGroup, 50, 60, 'barbarian')
-    barbarian['stats']['threat'] = 100
+    barbarian['stats']['threat'] = 200
     table.insert(heroes,barbarian)
     barbarian['myGroup'] = heroes
     barbarian['myEnemies'] = enemies
 
     barbarian2 = hBarbRed.hero(mainGroup, 50, 120, 'barbarian2')
-    barbarian2['stats']['threat'] = 50
+    barbarian2['stats']['threat'] = 100
     table.insert(heroes,barbarian2)
     barbarian2['myGroup'] = heroes
     barbarian2['myEnemies'] = enemies
@@ -490,7 +513,7 @@ function scene:create( event )
     stworek['myEnemies'] = heroes
 
     stworek2 = spikeFiend.hero(mainGroup, 590, 120, 'stworek2')
-    stworek2['stats']['threat'] = 103
+    stworek2['stats']['threat'] = 200
     table.insert(enemies,stworek2)
     stworek2['myGroup'] = enemies
     stworek2['myEnemies'] = heroes

@@ -102,6 +102,7 @@ local function hero(group, x, y, name)
     h['stats'] = {}
     h['stats']['movementSpeed'] = 2
     h['stats']['hp'] = 200
+    h['stats']['maxhp'] = 200
     h['stats']['dmg'] = 5
     h['stats']['type'] = 'mele'
     h['stats']['range'] = 0
