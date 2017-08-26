@@ -103,6 +103,8 @@ local function hero(group, x, y, name)
     h['stats']['movementSpeed'] = 4
     h['stats']['hp'] = 500
     h['stats']['dmg'] = 35
+    h['stats']['type'] = 'mele'
+    h['stats']['range'] = 0
 
     --flagi herosa
     h['flags'] = {}

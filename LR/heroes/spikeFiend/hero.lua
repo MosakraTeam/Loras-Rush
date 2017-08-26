@@ -103,11 +103,17 @@ local function hero(group, x, y, name)
     h['stats']['movementSpeed'] = 2
     h['stats']['hp'] = 200
     h['stats']['dmg'] = 5
+    h['stats']['type'] = 'mele'
+    h['stats']['range'] = 0
 
     --flagi herosa
     h['flags'] = {}
     h['flags']['canMove'] = true
     h['flags']['isAlive'] = true
+
+    h['attacks'] = {}
+    h['attacks']['attack_1'] = {}
+    h['attacks']['attack_1']['type'] = 'mele'
 
     --nazwa początkowej sekwencji
     h['seqName'] = "neutral"

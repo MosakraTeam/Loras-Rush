@@ -4,6 +4,8 @@ local composer = require( "composer" )
 local scene = composer.newScene()
 
 local hBarb = require("heroes.hBarb.hero")
+local hBarbRed = require("heroes.hBarbRed.hero")
+local hBarbBlue = require("heroes.hBarbBlue.hero")
 local spikeFiend = require("heroes.spikeFiend.hero")
 
 local heroes = {}
@@ -50,10 +52,13 @@ end
 
 function attackEnemy(hero,enemy)
     if enemy['flags']['isAlive'] then
-        enemy['stats']['hp'] = enemy['stats']['hp'] - ( hero['stats']['dmg'] + math.random(hero['stats']['dmg'] * 0.2) )
-        if enemy['stats']['hp'] <= 0 then
-            death(enemy)
-            checkThreat(hero,hero['myEnemies'])
+        if((hero['stats']['type'] == 'mele') or (hero['stats']['type'] == 'hitscan')) then
+            enemy['stats']['hp'] = enemy['stats']['hp'] - ( hero['stats']['dmg'] + math.random(hero['stats']['dmg'] * 0.2) )
+            if enemy['stats']['hp'] <= 0 then
+                death(enemy)
+                checkThreat(hero,hero['myEnemies'])
+            end
+        else 
         end
     end
 end
@@ -109,6 +114,14 @@ function moveGroupSprite(group)
     for i,v in pairs(group) do
         if v['flags']['isAlive'] then
             toSprite(v,v['myEnemy'])
+        end
+    end
+end
+
+function checkEnemyIsDead(group)
+    for i,v in pairs(group) do
+        if not v['myEnemy']['flags']['isAlive'] then
+            checkThreat(v,v['myEnemies'])
         end
     end
 end
@@ -221,10 +234,12 @@ function checkColision(hero,enemy)
         difX = math.abs(x1 - x2)
         difY = math.abs(y1 - y2)
 
+        dis = math.sqrt(math.pow(difX,2) + math.pow(difY,2))
+
         sumW = w1 + w2
         sumH = h1 + h2
 
-        if (sumW > difX) and (sumH > difY) then
+        if ((sumW > difX) and (sumH > difY)) or (dis < hero['stats']['range']) then
             hero['flags']['canMove'] = false
 
             hero['seqName'] = 'attack_1'
@@ -308,10 +323,10 @@ end
 function showHP(group)
     for i,v in pairs(group) do
         if v['flags']['isAlive'] then
-            hpui[v['sprite'].myName].text = v['sprite'].myName .. ' hp: ' .. v['stats']['hp']
+            hpui[v['sprite'].myName].text = v['sprite'].myName .. ' hp: ' .. v['stats']['hp'] .. ' ' .. v['myEnemy']['sprite'].myName
             hpui[v['sprite'].myName].x = hpui[v['sprite'].myName].width/2 + 2
         else
-            hpui[v['sprite'].myName].text = v['sprite'].myName .. ' is death'
+            hpui[v['sprite'].myName].text = v['sprite'].myName .. ' is death' .. ' ' .. v['myEnemy']['sprite'].myName
             hpui[v['sprite'].myName].x = hpui[v['sprite'].myName].width/2 + 2
         end
     end
@@ -323,6 +338,8 @@ local function gameLoop()
     moveGroupSprite(enemies)
     checkGroupCollision(heroes)
     checkGroupCollision(enemies)
+    checkEnemyIsDead(heroes)
+    checkEnemyIsDead(enemies)
     showHP(heroes)
     showHP(enemies)
     --debugSpritePrint(barbarian['sprite'])
@@ -361,11 +378,17 @@ function scene:create( event )
     barbarian['myGroup'] = heroes
     barbarian['myEnemies'] = enemies
 
-    barbarian2 = hBarb.hero(mainGroup, 50, 120, 'barbarian2')
-    barbarian2['stats']['threat'] = 200
+    barbarian2 = hBarbRed.hero(mainGroup, 50, 120, 'barbarian2')
+    barbarian2['stats']['threat'] = 50
     table.insert(heroes,barbarian2)
     barbarian2['myGroup'] = heroes
     barbarian2['myEnemies'] = enemies
+
+    barbarian3 = hBarbBlue.hero(mainGroup, 50, 120, 'barbarian3')
+    barbarian3['stats']['threat'] = 60
+    table.insert(heroes,barbarian3)
+    barbarian3['myGroup'] = heroes
+    barbarian3['myEnemies'] = enemies
 
     --[[barbarian3 = hBarb.hero(mainGroup, 50, 180, 'barbarian3')
     barbarian3['stats']['threat'] = 300
