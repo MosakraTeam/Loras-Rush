@@ -10,6 +10,7 @@ local spikeFiend = require("heroes.spikeFiend.hero")
 
 local heroes = {}
 local enemies = {}
+local projectiles = {}
 
 local hpui = {}
 -- -----------------------------------------------------------------------------------
@@ -50,6 +51,80 @@ function death(hero)
     end
 end
 
+function projectileDamage(pro)
+    pro['myEnemy']['stats']['hp'] = pro['myEnemy']['stats']['hp'] - ( pro['stats']['dmg'] + math.random(pro['stats']['dmg'] * 0.2) )
+    if pro['myEnemy']['stats']['hp'] <= 0 then
+        death(pro['myEnemy'])
+        --checkThreat(hero,hero['myEnemies'])
+    end
+    pro['sprite'].alpha = 0
+    pro['flags']['isAlive'] = false
+end
+
+function projectileColision(pro)
+    x1 = pro['sprite'].x
+    y1 = pro['sprite'].y
+    w1 = pro['sprite'].width/4
+    h1 = pro['sprite'].height/8
+
+    x2 = pro['myEnemy']['sprite'].x
+    y2 = pro['myEnemy']['sprite'].y
+    w2 = pro['myEnemy']['sprite'].width/4
+    h2 = pro['myEnemy']['sprite'].height/8
+
+    difX = math.abs(x1 - x2)
+    difY = math.abs(y1 - y2)
+
+    dis = math.sqrt(math.pow(difX,2) + math.pow(difY,2))
+
+    sumW = w1 + w2
+    sumH = h1 + h2
+
+    if ((sumW > difX) and (sumH > difY)) then
+        pro['flags']['isMove'] = false
+        projectileDamage(pro)
+        print('mlem');
+        --pro['seqName'] = 'attack_1'--boom
+    end
+end
+
+function projectileMovement()
+    for i,v in pairs(projectiles) do
+        if (not (v['myEnemy'] == nil)) then
+            if(v['flags']['isAlive']) then
+                if(v['myEnemy']['flags']['isAlive']) then
+                    startX = v['sprite'].x
+                    startY = v['sprite'].y
+                    endX = v['myEnemy']['sprite'].x
+                    endY = v['myEnemy']['sprite'].y
+                    speed = v['stats']['movementSpeed']
+
+                    distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
+
+                    directionX = (endX-startX) / distance;
+                    directionY = (startY-endY) / distance;
+
+                    setAnimation(v, directionX, directionY)
+                    
+                    if v['flags']['isMove'] then
+                        v['sprite'].x = v['sprite'].x + directionX * speed
+                        v['sprite'].y = v['sprite'].y - directionY * speed
+                        v['stats']['dirX'] = directionX
+                        v['stats']['dirY'] = directionY
+                    end
+
+                    projectileColision(v)
+                else
+                    v['sprite'].x = v['sprite'].x + v['stats']['dirX'] * v['stats']['movementSpeed']
+                    v['sprite'].y = v['sprite'].y - v['stats']['dirY'] * v['stats']['movementSpeed']
+                end
+            end
+        else
+            setAnimation(v, 0, -1)
+        end
+    end
+end
+
 function attackEnemy(hero,enemy)
     if enemy['flags']['isAlive'] then
         if((hero['stats']['type'] == 'mele') or (hero['stats']['type'] == 'hitscan')) then
@@ -58,7 +133,12 @@ function attackEnemy(hero,enemy)
                 death(enemy)
                 checkThreat(hero,hero['myEnemies'])
             end
-        else 
+        elseif ((hero['stats']['type'] == 'projectile')) then
+            pro = hero['projectiles'].projectile(mainGroup, hero['sprite'].x, hero['sprite'].y-1, 'boop-' .. #projectiles, hero['myEnemy'], hero['myEnemy']['sprite'].x, hero['myEnemy']['sprite'].y)
+            pro['sprite']:play()
+            print(pro['sprite'].myName)
+            table.insert(projectiles,pro)
+        else
         end
     end
 end
@@ -336,6 +416,7 @@ local function gameLoop()
     setGroupOrder(mainGroup)
     moveGroupSprite(heroes)
     moveGroupSprite(enemies)
+    projectileMovement()
     checkGroupCollision(heroes)
     checkGroupCollision(enemies)
     checkEnemyIsDead(heroes)
