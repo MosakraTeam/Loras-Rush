@@ -32,17 +32,290 @@ local barbarian = {}
 local gameLoopTimer
 
 -- -----------------------------------------------------------------------------------
--- Main Loop functions
+-- ----------------------------Main Loop functions------------------------------------
 -- -----------------------------------------------------------------------------------
 
-function randomHero(enemy)
-    --tablica herosów
-    --mlem = math.rand(5)
-    --return heroTable[mlem]
+
+
+-- Check()
+
+
+function checkAnimation(event)
+    sprite = event.target
+    hero = nil
+    if ( event.phase == "began" ) then 
+
+	elseif ( event.phase == "ended" ) then 
+
+    elseif ( event.phase == "loop") then
+        local flag = nil
+
+        for i in string.gmatch(sprite.sequence,"attack_1") do
+            if not (i == nil) then flag = i end
+        end
+
+        if flag == 'attack_1' then
+            for i,v in pairs(heroes) do
+                if sprite.myName == v['sprite'].myName then
+                    hero = v
+                end
+            end
+
+            if hero == nil then
+                for i,v in pairs(enemies) do
+                    if sprite.myName == v['sprite'].myName then
+                        hero = v
+                    end
+                end
+            end
+            attackEnemy(hero,hero['myEnemy'])
+        end
+    end
+end
+
+function checkColision(hero,enemy)
+    if (not (enemy == nil)) and enemy['flags']['isAlive'] then
+        x1 = hero['sprite'].x
+        y1 = hero['sprite'].y
+        w1 = hero['sprite'].width/4
+        h1 = hero['sprite'].height/8
+
+        x2 = enemy['sprite'].x
+        y2 = enemy['sprite'].y
+        w2 = enemy['sprite'].width/4
+        h2 = enemy['sprite'].height/8
+
+        difX = math.abs(x1 - x2)
+        difY = math.abs(y1 - y2)
+
+        dis = math.sqrt(math.pow(difX,2) + math.pow(difY,2))
+
+        sumW = w1 + w2
+        sumH = h1 + h2
+
+        if ((sumW > difX) and (sumH > difY)) or (dis < hero['stats']['range']) then
+            hero['flags']['canMove'] = false
+
+            hero['seqName'] = 'attack_1'
+        else
+            hero['flags']['canMove'] = true
+
+            hero['seqName'] = 'run'
+        end
+    else
+        setNeutral(hero)
+    end
+    
+end
+
+function checkGroupCollision(group)
+    for i,v in pairs(group) do
+        if v['flags']['isAlive'] then
+            checkColision(v,v['myEnemy'])
+        end
+    end
+end
+
+function checkThreat(hero, group)
+    if hero['flags']['isAlive'] then
+        local myThreat = hero['stats']['threat']
+        local biggestThreat = -1
+        local similarThreat = {}
+
+        for i,v in pairs(group) do
+            if v['flags']['isAlive'] then
+                if (0.9 * myThreat <= v['stats']['threat']) and (1.1 * myThreat >= v['stats']['threat']) then
+                    table.insert(similarThreat,i)
+                end
+
+                if (biggestThreat == -1) or (v['stats']['threat'] > group[biggestThreat]['stats']['threat']) then
+                    biggestThreat = i
+                end
+            end
+        end
+
+        if #similarThreat == 0 then
+            if not (biggestThreat == -1) then
+                hero['myEnemy'] = group[biggestThreat]
+            else
+                setNeutral(hero)
+            end
+        else
+            hero['myEnemy'] = group[similarThreat[math.random(#similarThreat)]]
+        end
+    end
+end
+
+function checkGroupThreat(group,enemy)
+    for i,v in pairs(group) do
+        checkThreat(v,enemy)
+        print(v['myEnemy']['sprite'].myName)
+    end
+end
+
+function checkEnemyIsDead(group)
+    for i,v in pairs(group) do
+        if not v['myEnemy']['flags']['isAlive'] then
+            checkThreat(v,v['myEnemies'])
+        end
+    end
+end
+
+
+
+-- Set()
+
+
+function setAnimation(hero, x,y)
+    local seq = '45'
+    local sin225 = math.sin(math.rad(22,5))
+    local sin675 = math.sin(math.rad(67,5))
+    if (y >= 0) and (x >= sin225) and (x < sin675) then seq = "15" 
+    elseif (x >= sin675) then seq = "3"
+    elseif (y < 0) and (x >= sin225) and (x < sin675) then seq = "45" 
+    elseif (math.abs(x) < sin225) and (y < 0) then seq = "6"
+    elseif (y < 0) and (x < -sin225) and (x >= -sin675) then seq = "75"
+    elseif (x < -sin675) then seq = "9"
+    elseif (y >= 0) and (x < -sin225) and (x >= -sin675) then seq = "105" 
+    elseif (math.abs(x) < sin225) and (y >= 0) then seq = "12"
+    end
+
+    if not (hero['sprite'].sequence == hero['seqName'] .. '-' .. seq) then
+        frame = hero['sprite'].frame
+        mainName = string.gmatch(hero['sprite'].sequence,'-')
+
+        hero['sprite']:setSequence(hero['seqName'] .. '-' .. seq)
+
+        if mainName == hero['seqName'] then
+            hero['sprite']:setFrame(frame)
+        end
+        
+        hero['sprite']:play()
+    end
+end
+
+function setGroupAnimationListener(group)
+    for i,v in pairs(group) do
+        v['sprite']:addEventListener( "sprite", checkAnimation )
+    end
+end
+
+function setGroupOrder(group)
+    canSort = false 
+    itmp = {}
+    
+    for i=1,group.numChildren do
+        table.insert(itmp,i)
+    end
+
+    --tmpitmp = itmp
+
+    for j=1,group.numChildren do
+        for i=1,group.numChildren-1 do
+            if group[itmp[i]].y > group[itmp[i+1]].y then
+                tmp = itmp[i]
+                itmp[i] = itmp[i+1]
+                itmp[i+1] = tmp
+                canSort = true
+            end
+        end
+    end
+    
+    if canSort then
+        for i=1,group.numChildren do
+            group:insert(i,group[itmp[i]])
+        end
+    end
 end
 
 function setNeutral(hero)
     hero['seqName'] = 'neutral'
+end
+
+
+
+-- Move()
+
+
+function moveGroupSprite(group)
+    for i,v in pairs(group) do
+        if v['flags']['isAlive'] then
+            toSprite(v,v['myEnemy'])
+        end
+    end
+end
+
+function moveEnemy(event) --temporary
+    stworek['sprite'].x = event.x
+    stworek['sprite'].y = event.y
+end
+
+function toPoint(hero,xy)
+    
+    startX = hero['sprite'].x
+    startY = hero['sprite'].y
+    endX = xy['x']
+    endY = xy['y']
+    speed = hero['stats']['movementSpeed']
+
+    distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
+
+    directionX = (endX-startX) / distance;
+    directionY = (startY-endY) / distance;
+
+    setAnimation(hero, directionX, directionY)
+
+    if hero['flags']['canMove'] then
+        hero['sprite'].x = hero['sprite'].x + directionX * speed
+        hero['sprite'].y = hero['sprite'].y - directionY * speed
+    end
+end
+
+function toSprite(hero,enemy)
+    if (not (enemy == nil)) and enemy['flags']['isAlive'] then
+        startX = hero['sprite'].x
+        startY = hero['sprite'].y
+        endX = enemy['sprite'].x
+        endY = enemy['sprite'].y
+        speed = hero['stats']['movementSpeed']
+
+        distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
+
+        directionX = (endX-startX) / distance;
+        directionY = (startY-endY) / distance;
+
+        setAnimation(hero, directionX, directionY)
+        
+        if hero['flags']['canMove'] then
+            hero['sprite'].x = hero['sprite'].x + directionX * speed
+            hero['sprite'].y = hero['sprite'].y - directionY * speed
+        end
+    else
+        setAnimation(hero, 0, -1)
+    end
+end
+
+
+
+-- Battle()
+
+
+function attackEnemy(hero,enemy)
+    if enemy['flags']['isAlive'] then
+        if((hero['stats']['type'] == 'mele') or (hero['stats']['type'] == 'hitscan')) then
+            enemy['stats']['hp'] = enemy['stats']['hp'] - ( hero['stats']['dmg'] + math.random(hero['stats']['dmg'] * 0.2) )
+            if enemy['stats']['hp'] <= 0 then
+                death(enemy)
+                checkThreat(hero,hero['myEnemies'])
+            end
+        elseif ((hero['stats']['type'] == 'projectile')) then
+            pro = hero['projectiles'].projectile(mainGroup, hero['sprite'].x, hero['sprite'].y-1, 'boop-' .. #projectiles, hero['myEnemy'], hero['myEnemy']['sprite'].x, hero['myEnemy']['sprite'].y)
+            pro['sprite']:play()
+            print(pro['sprite'].myName)
+            table.insert(projectiles,pro)
+        else
+        end
+    end
 end
 
 function death(hero)
@@ -127,264 +400,10 @@ function projectileMovement()
     end
 end
 
-function attackEnemy(hero,enemy)
-    if enemy['flags']['isAlive'] then
-        if((hero['stats']['type'] == 'mele') or (hero['stats']['type'] == 'hitscan')) then
-            enemy['stats']['hp'] = enemy['stats']['hp'] - ( hero['stats']['dmg'] + math.random(hero['stats']['dmg'] * 0.2) )
-            if enemy['stats']['hp'] <= 0 then
-                death(enemy)
-                checkThreat(hero,hero['myEnemies'])
-            end
-        elseif ((hero['stats']['type'] == 'projectile')) then
-            pro = hero['projectiles'].projectile(mainGroup, hero['sprite'].x, hero['sprite'].y-1, 'boop-' .. #projectiles, hero['myEnemy'], hero['myEnemy']['sprite'].x, hero['myEnemy']['sprite'].y)
-            pro['sprite']:play()
-            print(pro['sprite'].myName)
-            table.insert(projectiles,pro)
-        else
-        end
-    end
-end
 
-function checkAnimation(event)
-    sprite = event.target
-    hero = nil
-    if ( event.phase == "began" ) then 
 
-	elseif ( event.phase == "ended" ) then 
+-- Gui()
 
-    elseif ( event.phase == "loop") then
-        local flag = nil
-
-        for i in string.gmatch(sprite.sequence,"attack_1") do
-            if not (i == nil) then flag = i end
-        end
-
-        if flag == 'attack_1' then
-            for i,v in pairs(heroes) do
-                if sprite.myName == v['sprite'].myName then
-                    hero = v
-                end
-            end
-
-            if hero == nil then
-                for i,v in pairs(enemies) do
-                    if sprite.myName == v['sprite'].myName then
-                        hero = v
-                    end
-                end
-            end
-            attackEnemy(hero,hero['myEnemy'])
-        end
-    end
-end
-
-function setGroupAnimationListener(group)
-    for i,v in pairs(group) do
-        v['sprite']:addEventListener( "sprite", checkAnimation )
-    end
-end
-
-function checkGroupCollision(group)
-    for i,v in pairs(group) do
-        if v['flags']['isAlive'] then
-            checkColision(v,v['myEnemy'])
-        end
-    end
-end
-
-function moveGroupSprite(group)
-    for i,v in pairs(group) do
-        if v['flags']['isAlive'] then
-            toSprite(v,v['myEnemy'])
-        end
-    end
-end
-
-function checkEnemyIsDead(group)
-    for i,v in pairs(group) do
-        if not v['myEnemy']['flags']['isAlive'] then
-            checkThreat(v,v['myEnemies'])
-        end
-    end
-end
-
-function checkGroupThreat(group,enemy)
-    for i,v in pairs(group) do
-        checkThreat(v,enemy)
-        print(v['myEnemy']['sprite'].myName)
-    end
-end
-
-function checkThreat(hero, group)
-    if hero['flags']['isAlive'] then
-        local myThreat = hero['stats']['threat']
-        local biggestThreat = -1
-        local similarThreat = {}
-
-        for i,v in pairs(group) do
-            if v['flags']['isAlive'] then
-                if (0.9 * myThreat <= v['stats']['threat']) and (1.1 * myThreat >= v['stats']['threat']) then
-                    table.insert(similarThreat,i)
-                end
-
-                if (biggestThreat == -1) or (v['stats']['threat'] > group[biggestThreat]['stats']['threat']) then
-                    biggestThreat = i
-                end
-            end
-        end
-
-        if #similarThreat == 0 then
-            if not (biggestThreat == -1) then
-                hero['myEnemy'] = group[biggestThreat]
-            else
-                setNeutral(hero)
-            end
-        else
-            hero['myEnemy'] = group[similarThreat[math.random(#similarThreat)]]
-        end
-    end
-end
-
-function setGroupOrder(group)
-    canSort = false 
-    itmp = {}
-    
-    for i=1,group.numChildren do
-        table.insert(itmp,i)
-    end
-
-    --tmpitmp = itmp
-
-    for j=1,group.numChildren do
-        for i=1,group.numChildren-1 do
-            if group[itmp[i]].y > group[itmp[i+1]].y then
-                tmp = itmp[i]
-                itmp[i] = itmp[i+1]
-                itmp[i+1] = tmp
-                canSort = true
-            end
-        end
-    end
-    
-    if canSort then
-        for i=1,group.numChildren do
-            group:insert(i,group[itmp[i]])
-        end
-    end
-end
-
-function setAnimation(hero, x,y)
-    local seq = '45'
-    local sin225 = math.sin(math.rad(22,5))
-    local sin675 = math.sin(math.rad(67,5))
-    if (y >= 0) and (x >= sin225) and (x < sin675) then seq = "15" 
-    elseif (x >= sin675) then seq = "3"
-    elseif (y < 0) and (x >= sin225) and (x < sin675) then seq = "45" 
-    elseif (math.abs(x) < sin225) and (y < 0) then seq = "6"
-    elseif (y < 0) and (x < -sin225) and (x >= -sin675) then seq = "75"
-    elseif (x < -sin675) then seq = "9"
-    elseif (y >= 0) and (x < -sin225) and (x >= -sin675) then seq = "105" 
-    elseif (math.abs(x) < sin225) and (y >= 0) then seq = "12"
-    end
-
-    if not (hero['sprite'].sequence == hero['seqName'] .. '-' .. seq) then
-        frame = hero['sprite'].frame
-        mainName = string.gmatch(hero['sprite'].sequence,'-')
-
-        hero['sprite']:setSequence(hero['seqName'] .. '-' .. seq)
-
-        if mainName == hero['seqName'] then
-            hero['sprite']:setFrame(frame)
-        end
-        
-        hero['sprite']:play()
-    end
-end
-
-function checkColision(hero,enemy)
-    if (not (enemy == nil)) and enemy['flags']['isAlive'] then
-        x1 = hero['sprite'].x
-        y1 = hero['sprite'].y
-        w1 = hero['sprite'].width/4
-        h1 = hero['sprite'].height/8
-
-        x2 = enemy['sprite'].x
-        y2 = enemy['sprite'].y
-        w2 = enemy['sprite'].width/4
-        h2 = enemy['sprite'].height/8
-
-        difX = math.abs(x1 - x2)
-        difY = math.abs(y1 - y2)
-
-        dis = math.sqrt(math.pow(difX,2) + math.pow(difY,2))
-
-        sumW = w1 + w2
-        sumH = h1 + h2
-
-        if ((sumW > difX) and (sumH > difY)) or (dis < hero['stats']['range']) then
-            hero['flags']['canMove'] = false
-
-            hero['seqName'] = 'attack_1'
-        else
-            hero['flags']['canMove'] = true
-
-            hero['seqName'] = 'run'
-        end
-    else
-        setNeutral(hero)
-    end
-    
-end
-
-function toPoint(hero,xy)
-    
-    startX = hero['sprite'].x
-    startY = hero['sprite'].y
-    endX = xy['x']
-    endY = xy['y']
-    speed = hero['stats']['movementSpeed']
-
-    distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
-
-    directionX = (endX-startX) / distance;
-    directionY = (startY-endY) / distance;
-
-    setAnimation(hero, directionX, directionY)
-
-    if hero['flags']['canMove'] then
-        hero['sprite'].x = hero['sprite'].x + directionX * speed
-        hero['sprite'].y = hero['sprite'].y - directionY * speed
-    end
-end
-
-function toSprite(hero,enemy)
-    if (not (enemy == nil)) and enemy['flags']['isAlive'] then
-        startX = hero['sprite'].x
-        startY = hero['sprite'].y
-        endX = enemy['sprite'].x
-        endY = enemy['sprite'].y
-        speed = hero['stats']['movementSpeed']
-
-        distance = math.sqrt(math.pow(endX-startX,2)+math.pow(endY-startY,2));
-
-        directionX = (endX-startX) / distance;
-        directionY = (startY-endY) / distance;
-
-        setAnimation(hero, directionX, directionY)
-        
-        if hero['flags']['canMove'] then
-            hero['sprite'].x = hero['sprite'].x + directionX * speed
-            hero['sprite'].y = hero['sprite'].y - directionY * speed
-        end
-    else
-        setAnimation(hero, 0, -1)
-    end
-end
-
-function moveEnemy(event) --temporary
-    stworek['sprite'].x = event.x
-    stworek['sprite'].y = event.y
-end
 
 function debugSpritePrint(sprite) 
     print(sprite.myName .. ' ' .. sprite.x .. ' ' .. sprite.y)
@@ -427,6 +446,22 @@ function showHP(group)
         end
     end
 end
+
+
+
+-- WIP()
+
+
+function randomHero(enemy)
+    --tablica herosów
+    --mlem = math.rand(5)
+    --return heroTable[mlem]
+end
+
+
+-- -----------------------------------------------------------------------------------
+-- Main
+-- -----------------------------------------------------------------------------------
 
 local function gameLoop()
     setGroupOrder(mainGroup)
